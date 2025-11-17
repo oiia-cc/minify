@@ -1,24 +1,21 @@
+const redisConfig = require('../config/redis');
+const { FILE_QUEUE_NAME } = require("../constants/jobNames");
+
 const { Queue } = require('bullmq');
 
-const connection = {
-    host: process.env.UPSTASH_REDIS_HOST,
-    port: 6379,
-    /* 
-    password: process.env.UPSTASH_REDIS_PASSWORD,
-     tls: {}
-     
-     */
-};
+const connection = redisConfig();
 
-const fileQueue = new Queue('fileQueue', {
-    connection, defaultJobOptions: {
-        attempts: 2,
+const fileQueue = new Queue(FILE_QUEUE_NAME, {
+    connection,
+    defaultJobOptions: {
+        attempts: 1,
         backoff: {
             type: 'exponential',
             daley: 5000
-        }, removeOnComplete: true,
+        },
+        removeOnComplete: true,
         removeOnFail: false
     }
 })
 
-module.exports = { fileQueue, connection };
+module.exports = { fileQueue };

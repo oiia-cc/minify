@@ -1,61 +1,59 @@
-const fileService = require('../../services/fileService');
+const fileService = require('../../services/file/fileService');
 const { addFileJob } = require("../../queue/producers/fileProducer");
-// const db = require('../../loaders/dbLoader');
-const prisma = require('../../prisma1');
+const prisma = require('../../loaders/prisma');
 
-const hello = (req, res) => {
-    res.json({ message: 'hello-word' })
+const createFileAndVersion = async ({ userId, uploaded, file }) => {
+    return await prisma.$transaction(async (tx) => {
+        const fileRecord = await prisma.file.create({
+            data: {
+                owner_id: userId,
+                display_name: "aaaa"
+            }
+        });
+
+        // Tạo record tạm trong DB (ví dụ version với trạng thái “uploaded” hoặc “pending”)
+        const versionRecord = await prisma.fileVersion.create({
+            data: {
+                file_id: fileRecord.id,
+                storage_path: uploaded.path,
+                status: "uploaded",
+                size_bytes: file.size,
+                hash: "123",
+                filename: file.originalname,
+            }
+        });
+        return { file: fileRecord, version: versionRecord };
+    })
 }
 
 const uploadTmp = async (req, res, next) => {
     try {
         const file = req.file;
+        const userId = '123'; /* example user logined */
+
         if (!file) {
             return res.status(400).json({ success: "failed", message: "No file provided" });
         }
 
-        const userId = '123'; /* example user logined */
-
-        /* upload file to tmp bucket*/
-        const data = await fileService.uploadToTmp(file, userId);
-
-        const f = await prisma.file.findFirst({
-            where: {
-                id: data.id
-            }
-        });
-
-        let version = null;
-        if (!f) {
-            const res1 = await prisma.file.create({
-                data: {
-                    owner_id: userId,
-                    id: data.id,
-                    display_name: "aaaa"
-                }
-            });
-            console.log(">>>>", res1);
-            // Tạo record tạm trong DB (ví dụ version với trạng thái “uploaded” hoặc “pending”)
-            version = await prisma.fileVersion.create({
-                data: {
-                    file_id: data.id,
-                    storage_path: data.path,
-                    status: "uploaded",
-                    size_bytes: file.size,
-                    hash: "123",
-                    filename: file.originalname,
-                }
-            });
-
-            console.log(">>>>", version);
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Unauthorized" });
         }
 
-        await addFileJob(version.id, userId, data.path);
+        /* upload file to tmp bucket*/
+        const uploaded = await fileService.uploadToTmp(file, userId);
 
-        return res.json({
+        const result = await createFileAndVersion({ userId, uploaded, file })
+
+        await addFileJob(result.version.id, userId, uploaded.path);
+
+        return res.status(201).json({
             success: true,
-            data,
-            message: "File upload tmp!"
+            data: {
+                fileId: result.file.id,
+                versionId: result.version.id,
+                tmpPath: uploaded.path
+            },
+            message: "File uploaded to tmp successfully!"
         })
 
     } catch (err) {
@@ -64,6 +62,5 @@ const uploadTmp = async (req, res, next) => {
 }
 
 module.exports = {
-    hello,
     uploadTmp
 }

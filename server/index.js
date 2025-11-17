@@ -1,13 +1,14 @@
-require('dotenv').config({
-    path: require('path').resolve(__dirname, '../../.env.dev'),
-});
+const configApp = require('./src/config/index');
 
 const app = require('./src/app');
-const config = require('./src/config');
 const logger = require('./src/utils/logger');
 
-const PORT = config.PORT;
+const startServer = () => {
+    const PORT = configApp.app.port;
 
-app.listen(PORT, () => {
-    logger.info("app is listening on port " + PORT);
-}) 
+    app.listen(PORT, () => {
+        logger.info(">>>App is listening on port " + PORT);
+    })
+}
+
+startServer();

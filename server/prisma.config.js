@@ -1,6 +1,4 @@
-require("dotenv").config({
-    path: require('path').resolve(__dirname, '.env.dev'),
-});
+const configDb = require("./src/config/index");
 
 module.exports = {
     schema: "prisma/schema.prisma",
@@ -9,6 +7,6 @@ module.exports = {
     },
     engine: "classic",
     datasource: {
-        url: process.env.DATABASE_URL,
+        url: configDb.db.url,
     },
 };

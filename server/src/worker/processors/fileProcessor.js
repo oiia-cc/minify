@@ -1,27 +1,22 @@
-const storage = require('../../loaders/storageLoader');
-const db = require('../../loaders/dbLoader.js');
-const prisma = require('../../prisma1.js');
+const { FILE_STATUS } = require('../../constants/jobNames.js');
+const fileService = require('../../services/file/fileService.js');
+const { publishEvent } = require('../../services/eventService.js');
+const fileVerisonService = require('../../services/fileVersionService.js');
+const processFileJob = async ({ versionId, userId, tmpPath }) => {
 
-const processFileJob = async ({ tempFileId, userId, path }) => {
-    const { data, error } = await storage.storage.from("tmp").download(path);
+    const result = await fileService.moveToFinal(tmpPath, userId, versionId);
 
-    if (error) throw error;
+    console.log(result);
 
-    const resp =
-        await storage.storage.from('final').upload(`/${userId}/${tempFileId}`, data);
+    await fileVerisonService.updateStatus(versionId, FILE_STATUS.COMPLETED);
 
-    const { data: moved, error: moveErr } = resp;
-
-    if (moveErr) throw moveErr;
-
-
-    const res = await prisma.fileVersion.update({
-        where: { id: tempFileId },
-        data: { status: "completed" }
-    });
-
-    // await db`UPDATE file_versions SET status = 'completed' WHERE id = ${tempFileId}`;
-    console.log(">>> DB updated", res);
+    await publishEvent("file-events",
+        {
+            userId,
+            versionId: versionId,
+            status: FILE_STATUS.COMPLETED
+        }
+    )
 }
 
 module.exports = { processFileJob };
