@@ -1,6 +1,6 @@
 
 const { Worker } = require('bullmq');
-const { redis } = require('../../config/redisClient');
+const { createRedis } = require('../../config/redisClient');
 const { FILE_QUEUE_NAME, FILE_PROCESS_JOB } = require("../../constants/jobNames");
 const { processFileJob } = require('../processors/fileProcessor');
 const logger = require('../../utils/logger');
@@ -10,7 +10,7 @@ const worker = new Worker(FILE_QUEUE_NAME, async (job) => {
         await processFileJob(job.data);
     }
 }, {
-    connection: redis.options,
+    connection: createRedis(),
     skipStalledCheck: true,
     concurrency: 1,
     heartbeatInterval: 25000,
