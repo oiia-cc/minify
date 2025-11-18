@@ -5,31 +5,30 @@ const Redis = require("ioredis");
 const config = require('./index');
 
 let redis = null;
-let redisPub = null;
 let redisSub = null;
 
-function createRedis() {
-    if (redis) return { redis, redisPub, redisSub };
+const isUpstash = Boolean(config.redis.upstashUrl);
 
-    const isUpstash = Boolean(config.redis.upstashUrl);
+const baseConfig = isUpstash
+    ? config.redis.upstashUrl
+    : {
+        host: config.redis.host,
+        password: config.redis.password,
+        port: config.redis.port,
+    }
 
-    const baseConfig = isUpstash
-        ? config.redis.upstashUrl
-        : {
-            host: config.redis.host,
-            password: config.redis.password,
-            port: config.redis.port,
-
-        }
-
-    // MAIN client
-    redis = new Redis(baseConfig, { maxRetriesPerRequest: null });
-
-    // PUB/SUB (phải duplicate)
-    redisPub = redis.duplicate();
-    redisSub = redis.duplicate();
-
-    return { redis, redisPub, redisSub };
+const createRedis = () => {
+    if (!redis) {
+        redis = new Redis(baseConfig, { maxRetriesPerRequest: null });
+    }
+    return redis;
 }
 
-module.exports = createRedis();
+const createRedisSub = () => {
+    if (!redisSub) {
+        redisSub = redis.duplicate();
+    }
+    return redisSub;
+}
+
+module.exports = { createRedis, createRedisSub };

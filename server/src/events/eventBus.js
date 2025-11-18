@@ -1,5 +1,5 @@
-const { redisSub } = require('../config/redisClient');
-
+const { createRedisSub } = require('../config/redisClient');
+const sub = createRedisSub();
 let clients = new Set();
 
 function addClient(res) {
@@ -10,9 +10,9 @@ function removeClient(res) {
     clients.delete(res);
 }
 
-redisSub.subscribe("fileUpdate");
+sub.subscribe("fileUpdate");
 
-redisSub.on("message", (_, msg) => {
+sub.on("message", (_, msg) => {
     console.log("RAW MESSAGE FROM REDIS:", msg);
     let event;
     try {
