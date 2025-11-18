@@ -13,7 +13,7 @@ const worker = new Worker(FILE_QUEUE_NAME, async (job) => {
     connection: createRedis(),
     skipStalledCheck: true,
     concurrency: 1,
-    heartbeatInterval: 25000,
+    heartbeatInterval: 60000,
     metrics: false
 });
 

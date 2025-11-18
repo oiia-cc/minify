@@ -4,16 +4,17 @@ const { Queue } = require('bullmq');
 
 const fileQueue = new Queue(FILE_QUEUE_NAME, {
     connection: createRedis(),
+    defaultJobOptions: {
+        attempts: 1,
+        backoff: {
+            type: 'exponential',
+            daley: 5000
+        },
+        removeOnComplete: true,
+        removeOnFail: false
+    }
 })
-//  defaultJobOptions: {
-//         attempts: 1,
-//         backoff: {
-//             type: 'exponential',
-//             daley: 5000
-//         },
-//         removeOnComplete: true,
-//         removeOnFail: false
-//     }
+
 
 
 module.exports = { fileQueue };
