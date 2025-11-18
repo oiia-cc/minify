@@ -11,6 +11,7 @@ const rateLimit = require('./api/middlewares/rateLimit');
 const app = express();
 
 app.use(express.static('dist'));
+app.set('trust proxy', true);
 app.use(rateLimit);
 app.use(express.json({ limit: '5mb' }));
 
