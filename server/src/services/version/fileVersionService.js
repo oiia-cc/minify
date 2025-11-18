@@ -1,4 +1,4 @@
-const prisma = require('../loaders/prisma');
+const prisma = require('../../database');
 
 const updateStatus = (id, status) => {
     return prisma.fileVersion.update({

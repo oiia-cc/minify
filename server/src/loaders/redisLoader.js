@@ -3,19 +3,18 @@ const Redis = require("ioredis");
 const redisConfig = require('../config/redis');
 
 const createRedisClient = () => {
-    if (redisConfig.isUpstash) {
-        return new Redis({
-            host: redisConfig.host,
-            password: redisConfig.password,
-            port: redisConfig.port,
-            tls: {}
-        })
-    }
-    return new Redis({
+    const connection = {
         host: redisConfig.host,
         port: redisConfig.port,
         password: redisConfig.password
-    })
+    }
+
+    if (redisConfig.isUpstash) {
+        connection.tls = {}
+    }
+
+    const redis = new Redis(connection)
+    return redis;
 }
 
 module.exports = createRedisClient();

@@ -1,4 +1,4 @@
-const { addClient, removeClient } = require('../../services/eventBus');
+const { addClient, removeClient } = require('../../events/eventBus');
 
 module.exports = streamEvents = (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
@@ -6,6 +6,7 @@ module.exports = streamEvents = (req, res) => {
     res.setHeader("Connection", "keep-alive");
 
     res.flushHeaders();
+    res.write("retry: 5000\n\n");
 
     addClient(res);
 

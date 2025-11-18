@@ -9,14 +9,13 @@ function App() {
   useEffect(() => {
     const ev = new EventSource("http://localhost:3333/api/events");
 
-    ev.onmessage = e => {
-      const data = JSON.parse(e.data);
+    ev.addEventListener("fileUpdate", e => {
+      console.log("RECEIVED:", e.data);
 
-      console.log(">>> data:", data);
+    })
 
-      return () => ev.close();
-      // updateUI(data);
-    }
+    // updateUI(data);
+
   }, []);
 
   const [file, setFile] = useState(null);

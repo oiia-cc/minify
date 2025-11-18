@@ -1,6 +1,6 @@
 const fileService = require('../../services/file/fileService');
 const { addFileJob } = require("../../queue/producers/fileProducer");
-const prisma = require('../../loaders/prisma');
+const prisma = require('../../database');
 
 const createFileAndVersion = async ({ userId, uploaded, file }) => {
     return await prisma.$transaction(async (tx) => {

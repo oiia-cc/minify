@@ -1,9 +1,9 @@
 const configDb = require("./src/config/index");
 
 module.exports = {
-    schema: "/src/database/schema.prisma",
+    schema: "./src/database/schema.prisma",
     migrations: {
-        path: "prisma/migrations",
+        path: "./src/database/migrations",
     },
     engine: "classic",
     datasource: {

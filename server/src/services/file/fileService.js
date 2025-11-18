@@ -13,7 +13,7 @@ const uploadToTmp = async (file, userId) => {
         });
 
     if (error) {
-        throw new Error("Uploaded to storage /tmp failed", error)
+        throw new Error("Uploaded to storage /tmp failed" + error)
     }
 
     return {

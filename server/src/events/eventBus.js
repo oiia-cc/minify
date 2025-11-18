@@ -1,30 +1,43 @@
 const Redis = require('ioredis');
 const redisSub = new Redis();
 
-let clients = [];
+let clients = new Set();
 
-const addClient = (res) => {
-    clients.push(res);
+function addClient(res) {
+    clients.add(res);
 }
 
-const removeClient = (res) => {
-    clients = clients.filter(c => c !== res);
+function removeClient(res) {
+    clients.delete(res);
 }
 
-redisSub.subscribe("file-events");
+redisSub.subscribe("fileUpdate");
 
-redisSub.on("message", (_, message) => {
-    let event = null;
+redisSub.on("message", (_, msg) => {
+    console.log("RAW MESSAGE FROM REDIS:", msg);
+    let event;
     try {
-        event = JSON.parse(message);
+
+        event = JSON.parse(msg);
     } catch {
         return;
     }
 
-    const data = `data: ${JSON.stringify(event)}\n\n`;
+    const data = `event: fileUpdate\ndata: ${JSON.stringify(event)}\n\n`;
+    console.log(">>>", data);
+    console.log(">>> CLIENT COUNT:", clients.size);
 
-    clients.forEach(res => res.write(data));
-})
+    for (const res of clients) {
+        res.write(data);
+    }
+});
+
+// Heartbeat để giữ kết nối
+setInterval(() => {
+    for (const res of clients) {
+        res.write(`:keepalive\n\n`);
+    }
+}, 15000);
 
 
 module.exports = {

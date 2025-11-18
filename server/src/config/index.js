@@ -5,7 +5,7 @@ loadEnv();
 module.exports = {
     app: {
         env: process.env.NODE_ENV || "development",
-        port: process.env.PORT || 3333
+        port: process.env.APP_PORT || 3333
     },
     db: {
         url: process.env.DATABASE_URL
