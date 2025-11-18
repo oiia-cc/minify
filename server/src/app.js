@@ -1,6 +1,5 @@
 
 const express = require('express');
-const cors = require('cors');
 
 const fileRoutes = require('./api/routes/fileRoutes');
 const eventRoutes = require('./api/controllers/eventController');
