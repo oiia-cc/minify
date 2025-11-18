@@ -17,12 +17,13 @@ src/config/index.js
 src/config/loadEnv.js
 src/config/redis.js
 src/constants/jobNames.js
-src/database/prisma(generate)
+src/database/index.js
 src/database/schema.prisma
-src/events/jobEvents.js(nothing)
+src/events/eventBus.js
+src/events/eventPublisher.js
+src/events/eventSubscriber.js
 src/events/notifications/notificationPublisher.js
 src/events/notifications/notificationService.js
-src/loaders/dbLoader.js
 src/loaders/queueLoader.js
 src/loaders/redisLoader.js
 src/loaders/storageLoader.js
@@ -32,12 +33,10 @@ src/queue/processors/virusScan.js
 src/queue/producers/fileProducer.js
 src/queue/queueConfig.js
 src/queue/workers/fileWorker.js
-src/services/eventBus.js(listen write)
-src/services/eventService.js(publish)
 src/services/file/fileService.js
 src/services/version/fileVersionService.js
 src/utils/errorUtil.js
 src/utils/hashUtil.js
 src/utils/logger.js
-test.js
-test2.js
+test/testPrisma.js
+test/testRedis.js
