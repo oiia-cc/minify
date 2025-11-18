@@ -1,6 +1,6 @@
-# A Small upload image system with backgound process, virus scan, check duplicate, versioning, notifications
+# A small upload image system with backgound process, virus scan, check duplicate, versioning, notifications
 
-## Features
+## Feature
 - JWT authentication
 - RBAC (Admin, User)
 - Admin manages files and users
@@ -15,7 +15,7 @@
 5. Server sends an notification to user
 
 ## TeckStack
-### Client:
+### Client
 - Vite + React
 - Zustand (UI state)
 React Query (server state)
@@ -32,18 +32,49 @@ React Query (server state)
 - PostgreSQL (Supabase)
 - Upstash Redis (Pub/Sub + queue backend)
 
-### Deploy: 
+### Deploy
 - Vercel
 - Render 
 
-## Backend architecture:
+## Backend architecture
 - Queue-Worker-Server
 
 ## Folder Structure
-
+```
+deploy/
+├─ client/
+│  ├─ public/
+│  ├─ src/
+│  ├─ .gitignore
+│  ├─ eslint.config.js
+│  ├─ index.html
+│  ├─ package.json
+│  ├─ README.md
+│  └─ vite.config.js
+├─ server/
+│  ├─ scripts/
+│  ├─ src/
+│  │  ├─ api/
+│  │  ├─ config/
+│  │  ├─ constants/
+│  │  ├─ events/
+│  │  ├─ loaders/
+│  │  ├─ queue/
+│  │  ├─ services/
+│  │  ├─ src/
+│  │  ├─ utils/
+│  │  └─ app.js
+│  ├─ test/
+│  ├─ .gitignore
+│  ├─ index.js
+│  ├─ package.json
+│  └─ prisma.config.js
+├─ .gitignore
+└─ README.md
+```
 
 ## Dev Setup
-0. Install Redis local by run in Docker command: 
+0. Install Redis local by runing Docker command: 
 `docker run --name redis -dp 6379:6379 redis`
 1. Create file `.env.development` in `/server`
 ```
@@ -54,9 +85,13 @@ SUPABASE_SERVICE_KEY=
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 REDIS_PASSWORD=
-PORT=
+APP_PORT=
 ```
-2. Run `npm install && npm run dev`  in /client to install dependencies and run client
-3. Run `npm install && npm run dev && npm run worker` in /server to install dependencies and run server, worker
+2. In `/client` run:
+`npm install && npm run dev` to install dependencies and run client
+3. In `/server` run:
+`npx prisma generate` to create models prisma
+4. In `/server` run:
+`npm install && npm run dev && npm run worker` to install dependencies and run server, worker
 
 
