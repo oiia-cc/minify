@@ -2,12 +2,10 @@ import { useState } from 'react'
 import axios from 'axios'
 import { useEffect } from 'react';
 
-
-
 function App() {
 
   useEffect(() => {
-    const ev = new EventSource("http://localhost:3333/api/events");
+    const ev = new EventSource(`/api/events`);
 
     ev.addEventListener("fileUpdate", e => {
       console.log("RECEIVED:", e.data);
@@ -33,7 +31,7 @@ function App() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      await axios.post('http://localhost:3333/api/v1/files', formData, {
+      await axios.post('/api/v1/files', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
