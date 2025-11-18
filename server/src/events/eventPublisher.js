@@ -1,9 +1,7 @@
-const Redis = require("ioredis");
-const redis = new Redis();
-
+const { redisPub } = require('../config/redisClient');
 
 const publishEvent = async (channel, data) => {
-    return redis.publish(channel, JSON.stringify(data));
+    return redisPub.publish(channel, JSON.stringify(data));
 }
 
 module.exports = { publishEvent };

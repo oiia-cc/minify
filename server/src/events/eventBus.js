@@ -1,5 +1,4 @@
-const Redis = require('ioredis');
-const redisSub = new Redis();
+const { redisSub } = require('../config/redisClient');
 
 let clients = new Set();
 
@@ -17,15 +16,12 @@ redisSub.on("message", (_, msg) => {
     console.log("RAW MESSAGE FROM REDIS:", msg);
     let event;
     try {
-
         event = JSON.parse(msg);
     } catch {
         return;
     }
 
     const data = `event: fileUpdate\ndata: ${JSON.stringify(event)}\n\n`;
-    console.log(">>>", data);
-    console.log(">>> CLIENT COUNT:", clients.size);
 
     for (const res of clients) {
         res.write(data);

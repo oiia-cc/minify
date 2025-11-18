@@ -15,6 +15,7 @@ module.exports = {
         port: Number(process.env.REDIS_PORT),
         password: process.env.REDIST_PASSWORD,
 
+        upstashUrl: process.env.REDIS_URL,
         upstashHost: process.env.UPSTASH_REDIS_HOST,
         upstashPassword: process.env.UPSTASH_REDIS_PASSWORD,
     },

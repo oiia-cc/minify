@@ -1,4 +1,4 @@
-const prisma = require('./src/prisma');
+const prisma = require('../src/database');
 
 async function main() {
     const users = await prisma.user.findMany();

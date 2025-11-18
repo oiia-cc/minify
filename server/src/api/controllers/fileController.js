@@ -35,12 +35,14 @@ const uploadTmp = async (req, res, next) => {
             return res.status(400).json({ success: "failed", message: "No file provided" });
         }
 
+
         if (!userId) {
             return res.status(401).json({ success: false, message: "Unauthorized" });
         }
 
         /* upload file to tmp bucket*/
         const uploaded = await fileService.uploadToTmp(file, userId);
+
 
         const result = await createFileAndVersion({ userId, uploaded, file })
 
