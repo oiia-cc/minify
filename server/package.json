@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "pm2 delete all",
-    "dev": "cross-env NODE_ENV=development && pm2 start ecosystem.config.js --watch && pm2 logs",
-    "start": "npx prisma generate && NODE_ENV=production pm2 start ecosystem.config.js && pm2 logs",
+    "clean": "pm2 delete all || true",
+    "dev": "pm2 delete all || true && pm2 start ecosystem.config.js --watch && pm2 logs",
+    "start": "pm2 delete all || true && npx prisma generate && NODE_ENV=production pm2 start ecosystem.config.js && pm2 logs",
     "build:ui": "rm -rf ./dist && cd ../client && npm run build && cp -r ./dist ../server",
     "deploy": "npm run build:ui && git add . && git commit -m rebuild && git push",
     "test": "echo \"Error: no test specified\" && exit 1"
