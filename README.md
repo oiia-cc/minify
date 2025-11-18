@@ -92,6 +92,6 @@ APP_PORT=
 3. In `/server` run:
 `npx prisma generate` to create models prisma
 4. In `/server` run:
-`npm install && npm run dev && npm run worker` to install dependencies and run server, worker
+`npm install && npm run dev` to install dependencies and run server, worker
 
 
