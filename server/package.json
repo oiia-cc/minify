@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "pm2 stop all && pm2 delete ecosystem.config.js && pm2 flush",
+    "clean": "pm2 stop all && pm2 flush",
     "dev": "cross-env NODE_ENV=development && npm run clean && pm2 start ecosystem.config.js --watch",
     "start": "NODE_ENV=production && npm run clean && pm2 start ecosystem.config.js",
     "build:ui": "rm -rf ./dist && cd ../client && npm run build && cp -r ./dist ../server",
