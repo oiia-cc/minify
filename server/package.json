@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "worker": "cross-env NODE_ENV=development node --watch ./src/queue/workers/fileWorker.js",
-    "dev": "cross-env NODE_ENV=development node --watch index.js",
-    "dev:all": "npm-run-all --parallel dev worker",
-    "start": "cross-env NODE_ENV=production node --watch index.js",
-    "start:worker": "cross-env NODE_ENV=production node --watch  ./src/queue/workers/fileWorker.js",
+    "clean": "pm2 stop all && pm2 delete ecosystem.config.js && pm2 flush",
+    "dev": "cross-env NODE_ENV=development && npm run clean && pm2 start ecosystem.config.js --watch",
+    "start": "NODE_ENV=production && npm run clean && pm2 start ecosystem.config.js",
+    "build:ui": "rm -rf ./dist && cd ../client && npm run build && cp -r ./dist ../server",
+    "deploy": "npm run build:ui && git add . && git commit -m rebuild && git push",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -16,20 +16,19 @@
   "dependencies": {
     "@prisma/client": "^6.19.0",
     "@supabase/supabase-js": "^2.81.1",
-    "@upstash/redis": "^1.35.6",
     "bullmq": "^5.63.2",
     "cors": "^2.8.5",
-    "cross-env": "^10.1.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "ioredis": "^5.8.2",
     "multer": "^2.0.2",
+    "pm2": "^6.0.13",
     "postgres": "^3.4.7",
     "prisma": "^6.19.0",
     "redis": "^5.9.0"
   },
   "devDependencies": {
-    "npm-run-all": "^4.1.5"
+    "cross-env": "^10.1.0"
   }
 }
