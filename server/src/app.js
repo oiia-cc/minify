@@ -11,7 +11,7 @@ const rateLimit = require('./api/middlewares/rateLimit');
 
 const app = express();
 
-app.use(cors());
+app.use(express.static('dist'));
 app.use(rateLimit);
 app.use(express.json({ limit: '5mb' }));
 
