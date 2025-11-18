@@ -1,0 +1,61 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+  output     = "../src/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id
+  email     String   @unique
+  handle    String
+  createdAt DateTime @default(now())
+
+  files File[]
+
+  @@map("users")
+}
+
+model File {
+  id           String        @id @default(uuid())
+  is_deleted   Boolean       @default(false)
+  display_name String
+  created_at   DateTime      @default(now())
+  owner_id     String
+  owner        User          @relation(fields: [owner_id], references: [id])
+  versions     FileVersion[]
+
+  @@map("files")
+}
+
+model FileVersion {
+  id             String @id @default(uuid())
+  file_id        String
+  file           File   @relation(fields: [file_id], references: [id])
+  version_number Int    @default(1)
+
+  storage_path String
+  filename     String
+  mime_type    String?
+  size_bytes   Int?
+  hash         String?
+  status       FileStatus @default(uploaded)
+
+  @@map("file_versions")
+}
+
+enum FileStatus {
+  uploaded
+  queued
+  processing
+  virus_failed
+  duplicate
+  failed
+  completed
+
+  @@map("file_status")
+}
