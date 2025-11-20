@@ -1,0 +1,18 @@
+### request as admin
+GET http://localhost:3333/api/v1/users
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImhhbmRsZSI6ImFkbWluIiwiaWF0IjoxNzYzNjIzOTE4LCJleHAiOjE3NjM3MTAzMTh9.87ZowGWdSRAiuFheuIDbzww7lWummKh97r34ccP1aSg
+
+# {
+#   "user": {
+#     "id": "ab5819eb-dfe5-401d-917f-72ae0564db0c",
+#     "email": "admin@gmail.com",
+#     "handle": "admin",
+#     "role": "admin"
+#   }
+# }
+
+### request as user
+GET http://localhost:3333/api/v1/users
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imh1dTM2NzVAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJoYW5kbGUiOiJ1c2VyMSIsImlhdCI6MTc2MzYyNDcyNiwiZXhwIjoxNzYzNzExMTI2fQ.6k38uQNLcm6qNClgkbovVsqJ9laN__ZEShqcWMw3A00

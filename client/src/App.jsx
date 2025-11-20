@@ -11,11 +11,13 @@ const Loginform = () => {
 }
 
 
+
+
 function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
-
+  const [isLoggined, setIsLoggined] = useState(false);
 
   useEffect(() => {
     const ev = new EventSource(`/api/events`);
@@ -26,8 +28,12 @@ function App() {
     })
 
     // updateUI(data);
-
   }, []);
+
+
+  useEffect(() => {
+
+  }, [isLoggined]);
 
   const [file, setFile] = useState(null);
 
@@ -41,17 +47,27 @@ function App() {
     console.log(file);
     e.preventDefault();
 
+    const token = JSON.parse(localStorage.getItem("token"));
+
     try {
       const formData = new FormData();
       formData.append('file', file);
       await axios.post('/api/v1/files', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          "Authorization": `Bearer ${token}`
         }
       });
 
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  const handleLogout = () => {
+    localStorage.clear();
+    if (!localStorage.getItem("user")) {
+      setIsLoggined(false)
     }
   }
 
@@ -63,8 +79,13 @@ function App() {
         email,
         password
       });
-      console.log(result.data);
 
+      localStorage.setItem("token", JSON.stringify(result.data.access_token));
+      localStorage.setItem("user", JSON.stringify(result.data.user));
+      if (localStorage.getItem("user")) {
+        setIsLoggined(true)
+
+      };
     } catch (e) {
       console.log(e);
     }
@@ -72,24 +93,34 @@ function App() {
 
   return (
     <div>
-      <form onSubmit={handleLogin}>
-        login:
-        <label>
-          email
-          <input type='text' onChange={e => setEmail(e.target.value)} />
-        </label>
-        <label>
-          password
-          <input type='text' onChange={e => setPassword(e.target.value)} />
-        </label>
+      {
+        isLoggined ?
+          <div>
+            <h1>
+              loggined as {JSON.parse(localStorage.getItem("user")).handle}
+            </h1>
+            <button onClick={handleLogout}> Logout</button>
+            <form onSubmit={handleSubmit}>
+              upload file
+              <input type='file' onChange={e => changeFile(e)} />
+              <button type='submit'>submit</button>
+            </form>
+          </div>
+          : <form onSubmit={handleLogin}>
+            login:
+            <label>
+              email
+              <input type='text' onChange={e => setEmail(e.target.value)} />
+            </label>
+            <label>
+              password
+              <input type='text' onChange={e => setPassword(e.target.value)} />
+            </label>
 
-        <button type='submit'>Login</button>
-      </form>
-      <form onSubmit={handleSubmit}>
-        upload file
-        <input type='file' onChange={e => changeFile(e)} />
-        <button type='submit'>submit</button>
-      </form>
+            <button type='submit'>Login</button>
+          </form>
+      }
+
     </div>
   )
 }

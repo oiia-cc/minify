@@ -6,18 +6,22 @@ const createFileAndVersion = async ({ userId, uploaded, file }) => {
     return await prisma.$transaction(async (tx) => {
         const fileRecord = await prisma.file.create({
             data: {
-                owner_id: userId,
-                display_name: "aaaa"
+                ownerId: userId,
+                displayName: uploaded.filename,
+                isDeleted: false,
             }
         });
 
         // Tạo record tạm trong DB (ví dụ version với trạng thái “uploaded” hoặc “pending”)
         const versionRecord = await prisma.fileVersion.create({
             data: {
-                file_id: fileRecord.id,
-                storage_path: uploaded.path,
+                fileId: fileRecord.id,
+                storagePath: uploaded.path,
+                tmpPath: uploaded.path,
                 status: "uploaded",
-                size_bytes: file.size,
+                versionNumber: 1,
+                filename: uploaded.filename,
+                sizeBytes: uploaded.size,
                 hash: "123",
                 filename: file.originalname,
             }
@@ -29,7 +33,7 @@ const createFileAndVersion = async ({ userId, uploaded, file }) => {
 const uploadTmp = async (req, res, next) => {
     try {
         const file = req.file;
-        const userId = '123'; /* example user logined */
+        const userId = req.user.id; /* example user logined */
 
         if (!file) {
             return res.status(400).json({ success: "failed", message: "No file provided" });
