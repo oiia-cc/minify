@@ -6,6 +6,8 @@
 - Admin manages files and users
 - Users manages their files
 
+It's running at: https://minify-vvno.onrender.com/
+
 ## Upload pipeline
 1. client sends file to server
 2. Server checks permissons of user

@@ -1,0 +1,8 @@
+POST http://localhost:3333/api/login
+Content-Type: application/json
+Authorization: Bearer <your_access_token>
+
+{
+    "email": "admin@gmail.com",
+    "password": "123456"
+}

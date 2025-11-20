@@ -1,4 +1,3 @@
-const { info } = require("../../utils/logger");
 const rateLimit = require('express-rate-limit');
 
 module.exports = rateLimit({
