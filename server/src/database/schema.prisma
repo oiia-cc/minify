@@ -1,51 +1,22 @@
+// ----------------------------------------
+// GENERATOR & DATASOURCE
+// ----------------------------------------
 generator client {
   provider = "prisma-client-js"
   engineType = "binary" 
   output   = "./prisma"
 }
 
+
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id        String   @id
-  email     String   @unique
-  handle    String
-  createdAt DateTime @default(now())
-  
-  files     File[]
-  @@map("users")
-}
-
-model File {
-  id           String    @id @default(uuid())
-  is_deleted   Boolean   @default(false)
-  display_name String
-  created_at   DateTime  @default(now())
-owner_id     String
-  owner        User       @relation(fields: [owner_id], references: [id])
-  versions     FileVersion[]
-
-  @@map("files")
-}
-
-model FileVersion {
-  id            String      @id @default(uuid())
-  file_id       String
-  file          File        @relation(fields: [file_id], references: [id])
-  version_number Int        @default(1)
-
-  storage_path  String
-  filename      String
-  mime_type     String?
-  size_bytes    Int?
-  hash          String?
-  status        FileStatus  @default(uploaded)
-  @@map("file_versions")
-}
-
+// ----------------------------------------
+// ENUMS (map với ENUM Postgres)
+// ----------------------------------------
 enum FileStatus {
   uploaded
   queued
@@ -56,4 +27,230 @@ enum FileStatus {
   completed
 
   @@map("file_status")
+}
+
+enum JobStatus {
+  queued
+  in_progress
+  succeeded
+  failed
+  dead_letter
+
+  @@map("job_status")
+}
+
+// ----------------------------------------
+// USERS
+// ----------------------------------------
+model User {
+  id String @id @default(uuid()) @db.Uuid
+  handle      String     @unique
+  name        String
+  email       String    @unique
+  passwordHash String   @map("password_hash")
+  role        String      @default("user")
+  isBanned    Boolean     @default(false) @map("is_banned")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @default(now()) @map("updated_at")
+
+  files        File[]
+  devices      UserDevice[]
+  locations    UserLocation[]
+  auditLogs    AuditLog[] @relation("AuditLogActor") 
+  notifications Notification[]
+  sessions     Session[]
+
+  @@map("users")
+}
+
+// ----------------------------------------
+// FILES
+// ----------------------------------------
+model File {
+  id          String     @id @default(uuid()) @db.Uuid
+  ownerId     String     @map("owner_id") @db.Uuid
+  displayName String     @map("display_name") @db.VarChar(255)
+  isDeleted   Boolean    @default(false) @map("is_deleted")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @default(now()) @map("updated_at")
+
+  owner     User       @relation(fields: [ownerId], references: [id])  
+  versions  FileVersion[]
+  tags      FileTag[]
+
+  @@map("files")
+}
+
+// ----------------------------------------
+// FILE VERSIONS
+// ----------------------------------------
+model FileVersion {
+  id            String     @id @default(uuid()) @db.Uuid
+  fileId        String     @map("file_id")  @db.Uuid
+  versionNumber Int        @default(1) @map("version_number")
+  storagePath   String     @map("storage_path")
+  tmpPath       String?    @map("tmp_path")
+  filename      String
+  mimeType      String?    @map("mime_type")
+  sizeBytes     BigInt?    @map("size_bytes")
+  hash          String
+  status        FileStatus @default(uploaded)
+  notes         String?
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  file      File @relation(fields: [fileId], references: [id]) 
+  jobs      Job[]
+
+  @@unique([fileId, versionNumber])
+  @@index([hash])
+  @@map("file_versions")
+}
+
+// ----------------------------------------
+// TAGS
+// ----------------------------------------
+model Tag {
+  id   String  @id @default(uuid()) @db.Uuid
+  name String  @unique
+
+  files FileTag[]
+
+  @@map("tags")
+}
+
+// Pivot table file_tags
+model FileTag {
+  fileId String @map("file_id")  @db.Uuid
+  tagId  String @map("tag_id")  @db.Uuid
+
+  file File @relation(fields: [fileId], references: [id]) 
+  tag  Tag  @relation(fields: [tagId], references: [id])  
+
+  @@id([fileId, tagId])
+  @@map("file_tags")
+}
+
+// ----------------------------------------
+// DEVICES + USER_DEVICES
+// ----------------------------------------
+model Device {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String?
+  os        String?
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  users UserDevice[]
+
+  @@map("devices")
+}
+
+model UserDevice {
+  userId     String    @map("user_id")  @db.Uuid
+  deviceId   String    @map("device_id")  @db.Uuid
+  lastSeenAt DateTime? @map("last_seen_at")
+
+  user   User   @relation(fields: [userId], references: [id])  
+  device Device @relation(fields: [deviceId], references: [id])
+
+  @@id([userId, deviceId])
+  @@map("user_devices")
+}
+
+// ----------------------------------------
+// LOCATIONS + USER_LOCATIONS
+// ----------------------------------------
+model Location {
+  id        String    @id @default(uuid()) @db.Uuid
+  ipAddress String?   @map("ip_address")
+  geoJson   Json?     @map("geo_json")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  users UserLocation[]
+
+  @@map("locations")
+}
+
+model UserLocation {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id")  @db.Uuid
+  locationId String    @map("location_id")  @db.Uuid
+  seenAt     DateTime  @default(now()) @map("seen_at")
+
+  user     User     @relation(fields: [userId], references: [id]) 
+  location Location @relation(fields: [locationId], references: [id]) 
+
+  @@map("user_locations")
+}
+
+// ----------------------------------------
+// AUDIT LOGS
+// ----------------------------------------
+model AuditLog {
+  id          String      @id @default(uuid()) @db.Uuid
+  actorUserId String?   @map("actor_user_id")  @db.Uuid
+  actorType   String    @default("user") @map("actor_type")
+  action      String
+  targetType  String?   @map("target_type")
+  targetId    String?   @map("target_id")  @db.Uuid
+  details     Json?
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  actor User? @relation("AuditLogActor", fields: [actorUserId], references: [id]) 
+
+  @@map("audit_logs")
+}
+
+// ----------------------------------------
+// JOBS
+// ----------------------------------------
+model Job {
+  id             String      @id @default(uuid()) @db.Uuid
+  jobUuid        String      @default(uuid()) @db.Uuid @map("job_uuid")
+  fileVersionId  String?     @map("file_version_id")  @db.Uuid
+  jobType        String?     @map("job_type")
+  payload        Json?
+  attempts       Int         @default(0)
+  maxAttempts    Int         @default(3) @map("max_attempts")
+  status         JobStatus   @default(queued)
+  lastError      String?     @map("last_error")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @default(now()) @map("updated_at")
+
+  fileVersion FileVersion? @relation(fields: [fileVersionId], references: [id]) 
+
+  @@map("jobs")
+}
+
+// ----------------------------------------
+// NOTIFICATIONS
+// ----------------------------------------
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id")  @db.Uuid
+  type      String?
+  payload   Json?
+  isRead    Boolean   @default(false) @map("is_read")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id]) 
+
+  @@map("notifications")
+}
+
+// ----------------------------------------
+// SESSIONS
+// ----------------------------------------
+model Session {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id")  @db.Uuid
+  sessionToken String   @unique @map("session_token")
+  userAgent    String?  @map("user_agent")
+  ipAddress    String?  @map("ip_address")
+  createdAt    DateTime @default(now()) @map("created_at")
+  lastSeenAt   DateTime? @map("last_seen_at")
+
+  user User @relation(fields: [userId], references: [id]) 
+
+  @@map("sessions")
 }

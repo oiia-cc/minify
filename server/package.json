@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "prisma": {},
   "scripts": {
+    "seed": "node ./src/database/seed.js",
     "clean": "pm2 delete all || true",
     "dev": "pm2 delete all || true && pm2 start ecosystem.config.js --watch && pm2 logs",
     "start": "pm2 delete all || true && npx prisma generate && NODE_ENV=production pm2 start ecosystem.config.js && pm2 logs",
@@ -16,11 +18,13 @@
   "dependencies": {
     "@prisma/client": "^6.19.0",
     "@supabase/supabase-js": "^2.81.1",
+    "bcryptjs": "^3.0.3",
     "bullmq": "^5.63.2",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "ioredis": "^5.8.2",
+    "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "pm2": "^6.0.13",
     "postgres": "^3.4.7",
