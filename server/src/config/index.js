@@ -5,7 +5,7 @@ loadEnv();
 module.exports = {
     app: {
         env: process.env.NODE_ENV || "development",
-        port: process.env.APP_PORT || 3333,
+        port: process.env.PORT || 3333 || process.env.APP_PORT,
         jwtSecret: process.env.JWT_SECRET,
         jwtLifetime: process.env.JWT_LIFETIME
     },
