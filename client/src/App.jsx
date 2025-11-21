@@ -32,7 +32,9 @@ function App() {
 
 
   useEffect(() => {
-
+    if (localStorage.getItem("user")) {
+      setIsLoggined(true);
+    }
   }, [isLoggined]);
 
   const [file, setFile] = useState(null);
