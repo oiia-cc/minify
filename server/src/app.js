@@ -26,7 +26,7 @@ app.use('/api/v1/files',
     fileRoutes
 );
 
-app.get("/api/events",
+app.use("/api/events",
     eventRoutes
 )
 
