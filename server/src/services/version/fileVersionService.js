@@ -6,7 +6,19 @@ const updateStatus = (id, status) => {
         data: { status }
     })
 }
+const updateOne = (id, field) => {
+    return prisma.fileVersion.update({
+        where: { id },
+        data: { field }
+    })
+}
+
+const createOne = (newData) => {
+    return prisma.fileVersion.create(newData);
+}
 
 module.exports = {
-    updateStatus
+    updateStatus,
+    updateOne,
+    createOne
 }

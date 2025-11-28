@@ -1,33 +1,47 @@
 const fileService = require('../../services/file/fileService');
-const { addFileJob } = require("../../queue/producers/fileProducer");
+const { addFileJob, scanFileJob } = require("../../queue/producers/fileProducer");
 const prisma = require('../../database');
+const crypto = require('crypto');
+const fileVerisonService = require('../../services/version/fileVersionService');
+const { publishEvent } = require('../../events/eventPublisher');
 
-const createFileAndVersion = async ({ userId, uploaded, file }) => {
-    return await prisma.$transaction(async (tx) => {
-        const fileRecord = await prisma.file.create({
-            data: {
-                ownerId: userId,
-                displayName: uploaded.filename,
-                isDeleted: false,
-            }
-        });
+const createFileAndVersion = async (userId, uploaded, file) => {
+    const fileRecord = await prisma.file.create({
+        data: {
+            ownerId: userId,
+            displayName: uploaded.filename,
+            isDeleted: false,
+        }
+    });
 
-        // Tạo record tạm trong DB (ví dụ version với trạng thái “uploaded” hoặc “pending”)
-        const versionRecord = await prisma.fileVersion.create({
-            data: {
-                fileId: fileRecord.id,
-                storagePath: uploaded.path,
-                tmpPath: uploaded.path,
-                status: "uploaded",
-                versionNumber: 1,
-                filename: uploaded.filename,
-                sizeBytes: uploaded.size,
-                hash: "123",
-                filename: file.originalname,
-            }
-        });
-        return { file: fileRecord, version: versionRecord };
+    const hash = crypto.createHash("sha256").update(file.buffer).digest("hex");
+
+    // Tạo record tạm trong DB (ví dụ version với trạng thái “uploaded” hoặc “pending”)
+    const versionRecord = await prisma.fileVersion.create({
+        data: {
+            storagePath: uploaded.path,
+            tmpPath: uploaded.path,
+            status: "uploaded",
+            versionNumber: 1,
+            filename: uploaded.filename,
+            sizeBytes: uploaded.size,
+            hash: hash,
+            filename: file.originalname,
+            mimeType: file.mimeType,
+            file: { connect: { id: fileRecord.id } }
+        }
+    });
+    // console.log(">>> ver: ", fileRecord);
+    console.log(">>> ver: ", versionRecord);
+    await publishEvent("fileUpdate", {
+        success: true,
+        status: "UPLOADED"
     })
+
+    return {
+        newFile: fileRecord,
+        newVersion: versionRecord
+    };
 }
 
 const uploadTmp = async (req, res, next) => {
@@ -35,11 +49,12 @@ const uploadTmp = async (req, res, next) => {
         const file = req.file;
         const userId = req.user.id; /* example user logined */
 
+        // console.log(">>> file: ", file);
+        // console.log("PRISMA VERSION:", require("@prisma/client").Prisma?.prismaVersion);
+
         if (!file) {
             return res.status(400).json({ success: "failed", message: "No file provided" });
         }
-
-
         if (!userId) {
             return res.status(401).json({ success: false, message: "Unauthorized" });
         }
@@ -47,19 +62,18 @@ const uploadTmp = async (req, res, next) => {
         /* upload file to tmp bucket*/
         const uploaded = await fileService.uploadToTmp(file, userId);
 
+        const { newFile, newVersion } = await createFileAndVersion(userId, uploaded, file)
 
-        const result = await createFileAndVersion({ userId, uploaded, file })
-
-        await addFileJob(result.version.id, userId, uploaded.path);
+        await addFileJob(newVersion.id, userId, newVersion.tmpPath, newFile.id);
 
         return res.status(201).json({
             success: true,
             data: {
-                fileId: result.file.id,
-                versionId: result.version.id,
-                tmpPath: uploaded.path
+                fileId: newFile.id,
+                versionId: newVersion.id,
+                tmpPath: newVersion.tmpPath
             },
-            message: "File uploaded to tmp successfully!"
+            message: "File uploaded to [tmp] successfully!"
         })
 
     } catch (err) {

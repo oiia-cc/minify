@@ -4,11 +4,11 @@ const { createRedis } = require('../../config/redisClient');
 const { FILE_QUEUE_NAME, FILE_PROCESS_JOB } = require("../../constants/jobNames");
 const { processFileJob } = require('../processors/fileProcessor');
 const logger = require('../../utils/logger');
+const { processVirusScan } = require('../processors/virusScan');
+const { runPipeline } = require("../workers/engine");
 
 const worker = new Worker(FILE_QUEUE_NAME, async (job) => {
-    if (job.name === FILE_PROCESS_JOB) {
-        await processFileJob(job.data);
-    }
+    runPipeline(job);
 }, {
     connection: createRedis(),
     skipStalledCheck: true,

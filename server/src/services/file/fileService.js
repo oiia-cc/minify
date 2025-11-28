@@ -25,18 +25,23 @@ const uploadToTmp = async (file, userId) => {
     }
 }
 
-const moveToFinal = async (tmpPath, userId, fileId) => {
+const moveToFinal = async ({ tmpPath, userId, fileId }) => {
+
     const downloadResult = await supabase.storage.from(BUCKET_TMP).download(tmpPath);
 
     if (downloadResult.error) throw downloadResult.error;
+    // console.log(">>> pat:", downloadResult);
 
     const finalPath = `/${userId}/${fileId}`;
-    const { data, error } = await supabase.storage.from(BUCKET_FINAL).upload(finalPath, downloadResult.data);
+    const { data, error } = await supabase.storage.from(BUCKET_FINAL).upload(finalPath, downloadResult.data, {
+        upsert: true // This will overwrite if the file exists
+    });
 
     if (error) {
         throw error
     }
-    return data;
+
+    return "moved final";
 }
 
 module.exports = {

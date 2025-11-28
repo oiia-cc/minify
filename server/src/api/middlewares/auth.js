@@ -41,6 +41,7 @@ const ROLE_PERMISSION = {
             PERMISSIONS.FILE_MANAGE,
             PERMISSIONS.USER_MANAGE,
             PERMISSIONS.EVENT_READ,
+            PERMISSIONS.FILE_WRITE
         ]
     ),
     user: new Set([

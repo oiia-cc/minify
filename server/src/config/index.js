@@ -24,5 +24,7 @@ module.exports = {
     supabase: {
         url: process.env.SUPABASE_URL,
         serviceKey: process.env.SUPABASE_SERVICE_KEY
+    }, cloudmersive: {
+        apiKeyAuth: process.env.CLOUDMERSIVE_API_KEY
     }
 }
