@@ -32,7 +32,7 @@ function App() {
       })
     }
     // updateUI(data);
-  }, []);
+  }, [isLoggined]);
 
 
   useEffect(() => {
