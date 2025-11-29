@@ -1,17 +1,13 @@
 
 const Pipelines = require('../Pipelines');
-
-const { dedupCheck } = require('../processors/dupCheck');
-const { virusScan } = require('../processors/virusScan')
-const { optimize } = require('../processors/optimize');
+const { eventName } = require('../../constants');
+const { virusScan } = require('../processors/virusScan');
 const { updateFinal } = require('../processors/updateFinal');
 const { publishEvent } = require('../../events/eventPublisher');
 const { info } = require('../../utils/logger');
 
 const processors = {
-    dedupCheck: dedupCheck,
     virusScan: virusScan,
-    optimize: optimize,
     updateFinal: updateFinal
 }
 
@@ -24,7 +20,7 @@ const runPipeline = async (job) => {
 
             const status = await processors[step](job.data, job.name);
             // console.log(">>> ok, ", job.data);
-            await publishEvent("fileUpdate", {
+            await publishEvent(eventName.FILE_UPDATE, {
                 success: true,
                 status: status
             })
@@ -33,7 +29,7 @@ const runPipeline = async (job) => {
         }
     } catch (e) {
         // console.log(">>> e", e.message);
-        await publishEvent("fileUpdate", {
+        await publishEvent(eventName.FILE_UPDATE, {
             success: false,
             status: e.message
         })

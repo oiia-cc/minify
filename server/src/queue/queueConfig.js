@@ -1,8 +1,8 @@
 const { createRedis } = require('../config/redisClient');
-const { FILE_QUEUE_NAME } = require("../constants/jobNames");
+const { queueNames } = require("../constants");
 const { Queue } = require('bullmq');
 
-const fileQueue = new Queue(FILE_QUEUE_NAME, {
+const fileQueue = new Queue(queueNames.FILE_QUEUE_NAME, {
     connection: createRedis(),
     defaultJobOptions: {
         attempts: 1,

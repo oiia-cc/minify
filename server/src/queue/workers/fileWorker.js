@@ -1,13 +1,13 @@
 
 const { Worker } = require('bullmq');
 const { createRedis } = require('../../config/redisClient');
-const { FILE_QUEUE_NAME, FILE_PROCESS_JOB } = require("../../constants/jobNames");
-const { info } = require('../../utils/logger');
+const { queueNames, jobNames, messages } = require("../../constants");
+
 const { runPipeline } = require("../workers/engine");
 const logger = require('../../utils/logger');
 
 
-const worker = new Worker(FILE_QUEUE_NAME, async (job) => {
+const worker = new Worker(queueNames.FILE_QUEUE_NAME, async (job) => {
     logger.info('>>>start!!!!')
     await runPipeline(job);
 }, {
@@ -18,10 +18,10 @@ const worker = new Worker(FILE_QUEUE_NAME, async (job) => {
     metrics: false
 });
 
-worker.on('completed', job => {
-    logger.info('Job complete', job.id);
+worker.on(jobNames.JOB_STATUS.COMPLETED, job => {
+    logger.info(messages.JOB_COMPLETED, job.id);
 });
 
-worker.on('failed', (job, err) => {
-    logger.error('Job failed', job.id, err);
+worker.on(jobNames.JOB_STATUS.FAILED, (job, err) => {
+    logger.error(messages.JOB_FAILED, job.id, err);
 });

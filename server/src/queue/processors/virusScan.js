@@ -1,6 +1,7 @@
 const { scanBuffer } = require("../../services/virus/scanner")
 const supabase = require('../../config/supabaseClient');
 const fileVerisonService = require('../../services/version/versionService');
+const { jobNames } = require('../../constants');
 
 const virusScan = async ({ versionId, tmpPath }) => {
     // console.log(">>>tmp:", tmpPath);
@@ -11,11 +12,11 @@ const virusScan = async ({ versionId, tmpPath }) => {
     const scan = await scanBuffer(buffer);
 
     if (scan.infected) {
-        await fileVerisonService.updateStatus(versionId, "virus_failed");
-        throw new Error(`VIRUSS_DETECTED`);
+        await fileVerisonService.updateStatus(versionId, jobNames.FILE_STATUS.VIRUS_FAILED);
+        throw new Error(jobNames.FILE_STATUS.VIRUS_FAILED);
     }
 
-    return `NO_VIRUSS`;
+    return `NO_VIRUS`;
 }
 
 module.exports = {

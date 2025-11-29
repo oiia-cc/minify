@@ -1,9 +1,14 @@
 module.exports = {
-    FILE_QUEUE_NAME: "fileQueue",
-    FILE_PROCESS_JOB: "processFile",
+    FILE_PROCESS_JOB: "PROCESS_FILE",
     BUCKET_TMP: "tmp",
     BUCKET_FINAL: "final",
     FILE_STATUS: {
-        COMPLETED: "completed"
+        COMPLETED: "completed",
+        PROCESSING: "processing",
+        VIRUS_FAILED: "virus_failed"
+    },
+    JOB_STATUS: {
+        COMPLETED: "completed",
+        FAILED: "failed"
     }
 }
