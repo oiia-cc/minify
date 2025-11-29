@@ -8,5 +8,7 @@ const prisma = new PrismaClient({
         }
     }
 })
+// console.log(">>> p.ver:", prisma.fileVersion);
+
 
 module.exports = prisma;

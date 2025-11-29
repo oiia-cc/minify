@@ -1,7 +1,7 @@
-const configApp = require('./src/config/index');
+const configApp = require('./config/index');
 
-const app = require('./src/app');
-const logger = require('./src/utils/logger');
+const app = require('./app');
+const logger = require('./utils/logger');
 const startServer = () => {
     const PORT = configApp.app.port;
 

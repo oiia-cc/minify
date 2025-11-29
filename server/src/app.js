@@ -14,7 +14,7 @@ const loginRoutes = require('./api/routes/loginRoutes');
 const app = express();
 
 app.use(express.static('dist'));
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 app.use(rateLimit);
 app.use(express.json({ limit: '5mb' }));
 
