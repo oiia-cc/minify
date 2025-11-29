@@ -19,7 +19,7 @@ const uploadTmp = async (req, res, next) => {
         // console.log(">>> file: ", file);
         // console.log("PRISMA VERSION:", require("@prisma/client").Prisma?.prismaVersion);
 
-        const result = fileUploadApp.uploadTmp(userId, file);
+        const result = fileUploadApp.uploadTmp({ userId, file });
 
         return res.status(201).json({
             success: true,

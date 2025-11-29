@@ -5,12 +5,16 @@ const crypto = require('crypto');
 const { addFileJob } = require('../queue/producers/fileProducer');
 const fileVersionService = require('../services/version/versionService');
 const fileService = require('./file/fileService');
+const { info } = require('../utils/logger');
 
-const uploadTmp = async (userId, file) => {
+const uploadTmp = async ({ userId, file }) => {
+    info(">>>userId:", userId);
+
     if (!file) {
         return res.status(400).json({ success: "failed", message: "No file provided" });
     }
     if (!userId) {
+        info(">>>false b", false);
         return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
