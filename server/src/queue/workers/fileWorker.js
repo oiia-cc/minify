@@ -2,10 +2,11 @@
 const { Worker } = require('bullmq');
 const { createRedis } = require('../../config/redisClient');
 const { FILE_QUEUE_NAME, FILE_PROCESS_JOB } = require("../../constants/jobNames");
-const logger = require('../../utils/logger');
+const { info } = require('../../utils/logger');
 const { runPipeline } = require("../workers/engine");
 
 const worker = new Worker(FILE_QUEUE_NAME, async (job) => {
+    info('>>>start!!!!')
     await runPipeline(job);
 }, {
     connection: createRedis(),
