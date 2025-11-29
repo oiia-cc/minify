@@ -1,11 +1,11 @@
 const { FILE_STATUS } = require('../../constants/jobNames.js');
 const fileService = require('../../services/file/fileService.js');
 const { publishEvent } = require('../../events/eventPublisher.js');
-const fileVerisonService = require('../../services/version/fileVersionService.js');
+const fileVerisonService = require('../../services/version/versionService.js');
 // const { scanFileJob } = require('../producers/fileProducer.js');
 const { processVirusScan } = require('./virusScan.js');
 const { dedupCheck } = require('./optimize.js');
-const supabase = require('../../loaders/storageLoader.js')
+const supabase = require('../../config/supabaseClient.js')
 
 const processFileJob = async ({ versionId, userId, tmpPath, fileId }) => {
 

@@ -1,7 +1,7 @@
 const { fileQueue } = require('../queueConfig');
 const { FILE_PROCESS_JOB } = require('../../constants/jobNames');
 const logger = require('../../utils/logger');
-const fileVerisonService = require('../../services/version/fileVersionService');
+const fileVerisonService = require('../../services/version/versionService');
 const { publishEvent } = require('../../events/eventPublisher');
 
 const addFileJob = async (versionId, userId, tmpPath, fileId) => {

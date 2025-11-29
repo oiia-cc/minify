@@ -1,5 +1,5 @@
 const { BUCKET_TMP, BUCKET_FINAL } = require('../../constants/jobNames');
-const supabase = require('../../loaders/storageLoader');
+const supabase = require('../../config/supabaseClient');
 
 const uploadToTmp = async (file, userId) => {
     const tmpPath = `${userId}/${file.originalname}`;

@@ -1,7 +1,7 @@
 
 const crypto = require('crypto');
 const prisma = require('../../database');
-const fileVersionService = require('../../services/version/fileVersionService');
+const versionService = require('../../services/version/versionService');
 const dedupCheck = async (buffer, fileId, userId, versionId) => {
     const hash = crypto.createHash("sha256").update(buffer).digest("hex");
 
@@ -13,7 +13,7 @@ const dedupCheck = async (buffer, fileId, userId, versionId) => {
 
     // console.log(">>> exist:", exists);
     // if (!exists) {
-    //     await fileVersionService.updateOne(versionId, { hash: hash });
+    //     await versionService.updateOne(versionId, { hash: hash });
     //     return { duplicate: false, hash };
     // }
 

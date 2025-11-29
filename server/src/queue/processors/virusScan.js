@@ -1,7 +1,7 @@
 const { scanBuffer } = require("../../services/virus/scanner")
-const supabase = require('../../loaders/storageLoader');
+const supabase = require('../../config/supabaseClient');
 const prisma = require('../../database');
-const fileVerisonService = require('../../services/version/fileVersionService');
+const fileVerisonService = require('../../services/version/versionService');
 
 const virusScan = async (props) => {
 
