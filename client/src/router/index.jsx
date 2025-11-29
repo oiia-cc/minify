@@ -16,6 +16,9 @@ export default function AppRouter() {
                         </ProtectedRoute>
                     }
                 />
+                <Route path="/" element={<DashboardPage />} />
+                <Route path="/admin" element={<DashboardPage />} />
+                <Route path="/profile" element={<DashboardPage />} />
             </Routes>
         </BrowserRouter>
     )
