@@ -5,12 +5,16 @@ const crypto = require('crypto');
 const fileVerisonService = require('../../services/version/versionService');
 const { publishEvent } = require('../../events/eventPublisher');
 const fileUploadApp = require('../../services/fileUploadApp');
+const { info } = require('../../utils/logger');
 
 
 const uploadTmp = async (req, res, next) => {
     try {
         const file = req.file;
-        const userId = req.user.id; /* example user logined */
+        const userId = req.user.id;
+        info(">>>file:", file)
+        info(">>>user", req.user);
+        /* example user logined */
 
         // console.log(">>> file: ", file);
         // console.log("PRISMA VERSION:", require("@prisma/client").Prisma?.prismaVersion);
