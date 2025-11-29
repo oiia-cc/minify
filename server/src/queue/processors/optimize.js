@@ -1,7 +1,5 @@
 const optimize = async () => {
-    console.log(">>> optimize ok!_________");
-
-    return "success optimizeed"
+    return "success optimized"
 }
 
 

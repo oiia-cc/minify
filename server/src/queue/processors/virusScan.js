@@ -1,14 +1,9 @@
 const { scanBuffer } = require("../../services/virus/scanner")
 const supabase = require('../../config/supabaseClient');
-const prisma = require('../../database');
 const fileVerisonService = require('../../services/version/versionService');
 
-const virusScan = async (props) => {
-
-    console.log(">>> props", props);
-
-    const { versionId, userId, tmpPath } = props;
-    console.log(">>> virusscan");
+const virusScan = async ({ versionId, tmpPath }) => {
+    // console.log(">>>tmp:", tmpPath);
 
     const { data: blob } = await supabase.storage.from("tmp").download(tmpPath);
     const buffer = Buffer.from(await blob.arrayBuffer())

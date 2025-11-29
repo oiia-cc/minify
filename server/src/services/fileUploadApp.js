@@ -1,46 +1,10 @@
 
-const fileService = require('../services/file/fileService');
+const storageService = require('../services/storage/storageService');
 const { publishEvent } = require('../events/eventPublisher');
 const crypto = require('crypto');
 const { addFileJob } = require('../queue/producers/fileProducer');
-const prisma = require('../database');
-
-const createFileAndVersion = async (userId, uploaded, file) => {
-    const fileRecord = await prisma.file.create({
-        data: {
-            ownerId: userId,
-            displayName: uploaded.filename,
-            isDeleted: false,
-        }
-    });
-
-    const hash = crypto.createHash("sha256").update(file.buffer).digest("hex");
-
-    // Tạo record tạm trong DB (ví dụ version với trạng thái “uploaded” hoặc “pending”)
-    const versionRecord = await prisma.fileVersion.create({
-        data: {
-            storagePath: uploaded.path,
-            tmpPath: uploaded.path,
-            status: "uploaded",
-            versionNumber: 1,
-            filename: uploaded.filename,
-            sizeBytes: uploaded.size,
-            hash: hash,
-            filename: file.originalname,
-            mimeType: file.mimeType,
-            file: { connect: { id: fileRecord.id } }
-        }
-    });
-    // console.log(">>> ver: ", fileRecord);
-
-
-    return {
-        newFile: fileRecord,
-        newVersion: versionRecord
-    };
-}
-
-
+const fileVersionService = require('../services/version/versionService');
+const fileService = require('./file/fileService');
 
 const uploadTmp = async (userId, file) => {
     if (!file) {
@@ -50,24 +14,60 @@ const uploadTmp = async (userId, file) => {
         return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    /* upload file to tmp bucket*/
-    const uploaded = await fileService.uploadToTmp(file, userId);
+    // console.log(">", uploaded.filename);
+    // console.log(">>>f:", file);
 
-    const { newFile, newVersion } = await createFileAndVersion(userId, uploaded, file)
-
-
-    // console.log(">>> ver: ", newVersion);
-    await publishEvent("fileUpdate", {
-        success: true,
-        status: "UPLOADED"
+    const newFile = await fileService.createOne({
+        ownerId: userId,
+        displayName: file.originalname,
+        isDeleted: false
     })
 
-    await addFileJob(newVersion.id, userId, newVersion.tmpPath, newFile.id);
+    const hash = crypto.createHash("sha256").update(file.buffer).digest("hex");
+
+    const newVersion = await fileVersionService.createOne({
+        storagePath: "init",
+        tmpPath: "init",
+        status: "uploaded",
+        versionNumber: 1,
+        sizeBytes: file.size,
+        hash: hash,
+        filename: file.originalname,
+        mimeType: file.mimetype,
+        fileId: newFile.id
+    });
+
+    const tmpPath = `${newFile.ownerId}/${newFile.id}/${newVersion.id}/${newVersion.filename}`;
+
+    /* upload file to tmp bucket*/
+    await storageService.uploadToTmp({
+        tmpPath,
+        buffer: file.buffer,
+        mimeType: file.mimeType
+    });
+
+    await fileVersionService.updateOne(newVersion.id, {
+        status: "queued",
+        tmpPath: tmpPath,
+    });
+
+
+    await publishEvent("fileUpdate", {
+        status: "QUEUED",
+        success: true
+    });
+
+    await addFileJob({
+        versionId: newVersion.id,
+        userId,
+        tmpPath,
+        fileId: newFile.id
+    });
 
     return {
         fileId: newFile.id,
         versionId: newVersion.id,
-        tmpPath: newVersion.tmpPath
+        tmpPath: tmpPath
     }
 }
 

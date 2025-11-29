@@ -10,11 +10,8 @@ async function scanBuffer(buffer) {
 
     return new Promise((resolve, reject) => {
         const opts = { inputFile: buffer };
-        // console.log(">>> api:", api.scanFile);
 
         api.scanFile(opts, (err, data) => {
-            // console.log(">>> opts:", opts);
-
             if (err) return reject(err);
 
             resolve({

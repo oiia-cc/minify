@@ -12,7 +12,7 @@ const processFileJob = async ({ versionId, userId, tmpPath, fileId }) => {
     const { data: blob } = await supabase.storage.from("tmp").download(tmpPath);
     const buffer = Buffer.from(await blob.arrayBuffer())
     // const result = await fileService.moveToFinal(tmpPath, userId, versionId);
-    console.log(">>> tmpP: ", tmpPath);
+    // console.log(">>> tmpP: ", tmpPath);
 
     const virusResult = await processVirusScan(versionId, userId, tmpPath);
 
@@ -21,13 +21,13 @@ const processFileJob = async ({ versionId, userId, tmpPath, fileId }) => {
             {
                 userId,
                 versionId: versionId,
-                status: "viruss detect"
+                status: "VIRUSS_DEDECTED"
             }
         )
         return;
     }
     const dedupResult = await dedupCheck(buffer, fileId, userId, versionId);
-    console.log(">>> dedupr:", dedupResult);
+    // console.log(">>> dedupr:", dedupResult);
 
 
     // optimise ...

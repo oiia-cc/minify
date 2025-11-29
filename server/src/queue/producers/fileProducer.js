@@ -4,14 +4,14 @@ const logger = require('../../utils/logger');
 const fileVerisonService = require('../../services/version/versionService');
 const { publishEvent } = require('../../events/eventPublisher');
 
-const addFileJob = async (versionId, userId, tmpPath, fileId) => {
-    await fileVerisonService.updateStatus(versionId, "processing");
-    await publishEvent("fileUpdate", {
-        success: true,
-        status: "PROCESSING"
-    })
-
+const addFileJob = async ({ versionId, userId, tmpPath, fileId }) => {
     try {
+        await fileVerisonService.updateStatus(versionId, "processing");
+        await publishEvent("fileUpdate", {
+            success: true,
+            status: "PROCESSING"
+        })
+
         await fileQueue.add("PROCESS_FILE", {
             versionId,
             userId,
@@ -23,33 +23,6 @@ const addFileJob = async (versionId, userId, tmpPath, fileId) => {
     }
 }
 
-const updateVersionJob = async (versionId, userId, tmpPath, fileId) => {
-    try {
-        await fileQueue.add("UPDATE_VERSION", {
-            versionId,
-            userId,
-            tmpPath,
-            fileId
-        })
-    } catch (err) {
-        logger.error("Failed to enqueue file job: ", err.message);
-    }
-}
-
-
-const scanFileJob = async (versionId, userId, tmpPath) => {
-    try {
-        await fileQueue.add("scanning", {
-            versionId,
-            userId,
-            tmpPath
-        })
-    } catch (err) {
-        logger.error("Failed to enqueue file job: ", err.message);
-    }
-}
-
 module.exports = {
-    addFileJob,
-    scanFileJob
+    addFileJob
 }

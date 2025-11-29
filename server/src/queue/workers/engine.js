@@ -1,28 +1,26 @@
-const pipelines = {
-    PROCESS_FILE: ["virusScan", "optimize", "moveToFinal"],
-    UPDATE_VERSION: ["virus", "dupcheck", "optimize", "moveToFinal"],
-}
+
+const Pipelines = require('../Pipelines');
 
 const { dedupCheck } = require('../processors/dupCheck');
 const { virusScan } = require('../processors/virusScan')
 const { optimize } = require('../processors/optimize');
-const { moveToFinal } = require('../../services/file/fileService');
+const { updateFinal } = require('../processors/updateFinal');
 const { publishEvent } = require('../../events/eventPublisher');
-
 
 const processors = {
     dedupCheck: dedupCheck,
     virusScan: virusScan,
     optimize: optimize,
-    moveToFinal: moveToFinal
+    updateFinal: updateFinal
 }
 
 const runPipeline = async (job) => {
-    const pipeline = pipelines[job.name];
+    const pipeline = Pipelines[job.name];
+
     try {
         for (const step of pipeline) {
             const status = await processors[step](job.data, job.name);
-            // console.log(">>> ok, ", status);
+            // console.log(">>> ok, ", job.data);
             await publishEvent("fileUpdate", {
                 success: true,
                 status: status
