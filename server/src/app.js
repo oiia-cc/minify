@@ -10,7 +10,7 @@ const unknown = require('./api/middlewares/unknown');
 const rateLimit = require('./api/middlewares/rateLimit');
 const { authenticate, authorize, PERMISSIONS } = require('./api/middlewares/auth');
 const loginRoutes = require('./api/routes/loginRoutes');
-
+const aboutRoutes = require('./api/routes/aboutRoutes');
 const app = express();
 
 app.use(express.static('dist'));
@@ -19,7 +19,7 @@ app.use(rateLimit);
 app.use(express.json({ limit: '5mb' }));
 
 app.get('/api/health', (_, res) => res.status(200).json({ status: "ok!" }))
-app.use('/api/login', loginRoutes);
+app.use('/api/auth/login', loginRoutes);
 app.use('/api/v1/files',
     authenticate,
     authorize(PERMISSIONS.FILE_WRITE),
@@ -33,6 +33,11 @@ app.use("/api/events",
 app.use('/api/v1/users',
     authenticate,
     userRoutes
+);
+
+app.use('/api/auth/me',
+    authenticate,
+    aboutRoutes
 );
 
 app.use(unknown);
