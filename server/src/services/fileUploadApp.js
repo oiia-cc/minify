@@ -14,9 +14,11 @@ const uploadTmp = async ({ userId, file }) => {
         return res.status(400).json({ success: "failed", message: "No file provided" });
     }
     if (!userId) {
-        info(">>>false b", false);
+        console.log(">>>choose a");
         return res.status(401).json({ success: false, message: "Unauthorized" });
     }
+    console.log(">>>choose b");
+
 
     // console.log(">", uploaded.filename);
     // console.log(">>>f:", file);
@@ -26,6 +28,7 @@ const uploadTmp = async ({ userId, file }) => {
         displayName: file.originalname,
         isDeleted: false
     })
+    info(">>>newfile:", newFile)
 
     const hash = crypto.createHash("sha256").update(file.buffer).digest("hex");
 
