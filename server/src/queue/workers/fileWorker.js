@@ -4,9 +4,11 @@ const { createRedis } = require('../../config/redisClient');
 const { FILE_QUEUE_NAME, FILE_PROCESS_JOB } = require("../../constants/jobNames");
 const { info } = require('../../utils/logger');
 const { runPipeline } = require("../workers/engine");
+const logger = require('../../utils/logger');
+
 
 const worker = new Worker(FILE_QUEUE_NAME, async (job) => {
-    info('>>>start!!!!')
+    logger.info('>>>start!!!!')
     await runPipeline(job);
 }, {
     connection: createRedis(),
