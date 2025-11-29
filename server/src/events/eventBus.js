@@ -1,3 +1,5 @@
+const { eventName } = require('../constants');
+
 const sub = require('./eventSubscriber');
 let clients = new Set();
 
@@ -9,7 +11,7 @@ function removeClient(res) {
     clients.delete(res);
 }
 
-sub.on("fileUpdate", (event) => {
+sub.on(eventName.FILE_UPDATE, (event) => {
 
     const data = `event: fileUpdate\ndata: ${JSON.stringify(event)}\n\n`;
 

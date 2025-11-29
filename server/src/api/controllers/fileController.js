@@ -12,7 +12,6 @@ const uploadTmp = async (req, res, next) => {
     try {
         const file = req.file;
         const userId = req.user.id;
-        info(">>>file:", file)
         info(">>>user", req.user);
         /* example user logined */
 

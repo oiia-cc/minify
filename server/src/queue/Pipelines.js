@@ -1,6 +1,5 @@
 const Pipelines = {
-    PROCESS_FILE: ["virusScan", "optimize", "updateFinal"],
-    UPDATE_VERSION: ["virus", "dupcheck", "optimize", "moveToFinal"],
+    PROCESS_FILE: ["virusScan", "updateFinal"],
 }
 
 module.exports = Pipelines;

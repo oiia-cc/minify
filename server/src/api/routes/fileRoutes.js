@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const multer = require('multer');
 const fileController = require('../controllers/fileController');
+const { info } = require('../../utils/logger');
 
 const upload = multer({
     storage: multer.memoryStorage(),

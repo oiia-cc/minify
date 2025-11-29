@@ -1,25 +1,26 @@
 const { fileQueue } = require('../queueConfig');
-const { FILE_PROCESS_JOB } = require('../../constants/jobNames');
+
+const { jobNames, eventName, messages } = require('../../constants');
 const logger = require('../../utils/logger');
 const fileVerisonService = require('../../services/version/versionService');
 const { publishEvent } = require('../../events/eventPublisher');
 
 const addFileJob = async ({ versionId, userId, tmpPath, fileId }) => {
     try {
-        await fileVerisonService.updateStatus(versionId, "processing");
-        await publishEvent("fileUpdate", {
+        await fileVerisonService.updateStatus(versionId, jobNames.FILE_STATUS.PROCESSING);
+        await publishEvent(eventName.FILE_UPDATE, {
             success: true,
-            status: "PROCESSING"
+            status: jobNames.FILE_STATUS.PROCESSING
         })
 
-        await fileQueue.add("PROCESS_FILE", {
+        await fileQueue.add(jobNames.FILE_PROCESS_JOB, {
             versionId,
             userId,
             tmpPath,
             fileId
         })
     } catch (err) {
-        logger.error("Failed to enqueue file job: ", err.message);
+        logger.error(messages.ENQUEUE_FAILED + err.message);
     }
 }
 
