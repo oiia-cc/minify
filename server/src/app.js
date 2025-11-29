@@ -27,8 +27,6 @@ app.use('/api/v1/files',
 );
 
 app.use("/api/events",
-    authenticate,
-    authorize(PERMISSIONS.EVENT_READ),
     eventRoutes
 )
 
