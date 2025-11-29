@@ -6,7 +6,7 @@ const logger = require('../../utils/logger');
 const { runPipeline } = require("../workers/engine");
 
 const worker = new Worker(FILE_QUEUE_NAME, async (job) => {
-    runPipeline(job);
+    await runPipeline(job);
 }, {
     connection: createRedis(),
     skipStalledCheck: true,
