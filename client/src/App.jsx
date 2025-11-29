@@ -20,13 +20,17 @@ function App() {
   const [isLoggined, setIsLoggined] = useState(false);
 
   useEffect(() => {
-    const ev = new EventSource(`/api/events`);
+    if (localStorage.getItem("token")) {
+      const token = JSON.parse(localStorage.getItem("token"));
 
-    ev.addEventListener("fileUpdate", e => {
-      console.log("RECEIVED:", e.data);
+      const ev = new EventSource(`/api/events`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-    })
-
+      ev.addEventListener("fileUpdate", e => {
+        console.log("RECEIVED:", e.data);
+      })
+    }
     // updateUI(data);
   }, []);
 
