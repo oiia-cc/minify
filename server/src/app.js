@@ -4,11 +4,12 @@ const express = require('express');
 const fileRoutes = require('./api/routes/fileRoutes');
 const eventRoutes = require('./api/routes/eventRoutes');
 const userRoutes = require('./api/routes/userRoutes');
+const jobRoutes = require('./api/routes/jobRoutes');
 
 const errorHandler = require('./api/middlewares/errorHandler');
 const unknown = require('./api/middlewares/unknown');
 const rateLimit = require('./api/middlewares/rateLimit');
-const { authenticate, authorize, PERMISSIONS } = require('./api/middlewares/auth');
+const { authenticate, authorize, isAdmin, PERMISSIONS } = require('./api/middlewares/auth');
 const loginRoutes = require('./api/routes/loginRoutes');
 const aboutRoutes = require('./api/routes/aboutRoutes');
 const app = express();
@@ -18,7 +19,7 @@ app.set('trust proxy', 1);
 app.use(rateLimit);
 app.use(express.json({ limit: '5mb' }));
 
-app.get('/api/health', (_, res) => res.status(200).json({ status: "ok!" }))
+app.use('/api/health', (_, res) => res.status(200).json({ status: "ok!" }))
 app.use('/api/auth/login', loginRoutes);
 app.use('/api/v1/files',
     authenticate,
@@ -39,6 +40,12 @@ app.use('/api/auth/me',
     authenticate,
     aboutRoutes
 );
+
+app.use('/admin/jobs',
+    authenticate,
+    isAdmin,
+    jobRoutes
+)
 
 app.use(unknown);
 app.use(errorHandler);

@@ -1,6 +1,7 @@
 const { addClient, removeClient } = require('../../events/eventBus');
+const { info } = require('../../utils/logger');
 
-module.exports = streamEvents = (req, res) => {
+const streamEvents = (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
@@ -15,3 +16,5 @@ module.exports = streamEvents = (req, res) => {
         res.end();
     });
 }
+
+module.exports = streamEvents;

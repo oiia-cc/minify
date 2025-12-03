@@ -26,7 +26,7 @@ const createRedis = () => {
 
 const createRedisSub = () => {
     if (!redisSub) {
-        redisSub = redis.duplicate();
+        redisSub = new Redis(baseConfig, { maxRetriesPerRequest: null });
     }
     return redisSub;
 }

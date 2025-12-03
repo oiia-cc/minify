@@ -1,38 +1,46 @@
 
-const storageService = require('../services/storage/storageService');
-const { publishEvent } = require('../events/eventPublisher');
-const crypto = require('crypto');
-const { addFileJob } = require('../queue/producers/fileProducer');
-const fileVersionService = require('../services/version/versionService');
-const fileService = require('./file/fileService');
-const { info } = require('../utils/logger');
 
-const uploadTmp = async ({ userId, file }) => {
-    info(">>>userId:", userId);
-
-    if (!file) {
-        return res.status(400).json({ success: "failed", message: "No file provided" });
+const validate = (context) => {
+    if (!context.file) {
+        return {
+            status: 400,
+            success: false,
+            response: {
+                message: "No file provided"
+            },
+        };
     }
-    if (!userId) {
-        console.log(">>>choose a");
-        return res.status(401).json({ success: false, message: "Unauthorized" });
+    if (!context.userId) {
+        return {
+            status: 401,
+            success: false,
+            response: {
+                message: "Unauthorized"
+            },
+        };
     }
-    console.log(">>>choose b");
+    return {
+        status: 200,
+        success: true,
+        response: {
+            message: "ok"
+        },
+    };
+}
 
-
-    // console.log(">", uploaded.filename);
-    // console.log(">>>f:", file);
-
-    const newFile = await fileService.createOne({
+const createFileAndVersion = async (context) => {
+    const { userId, file, info } = context
+    const newFile = await context.fileService.createOne({
         ownerId: userId,
         displayName: file.originalname,
         isDeleted: false
     })
+
     info(">>>newfile:", newFile)
 
-    const hash = crypto.createHash("sha256").update(file.buffer).digest("hex");
+    const hash = await context.hash(file.buffer);
 
-    const newVersion = await fileVersionService.createOne({
+    const ver1 = await context.versionService.createOne({
         storagePath: "init",
         tmpPath: "init",
         status: "uploaded",
@@ -43,38 +51,77 @@ const uploadTmp = async ({ userId, file }) => {
         mimeType: file.mimetype,
         fileId: newFile.id
     });
-
-    const tmpPath = `${newFile.ownerId}/${newFile.id}/${newVersion.id}/${newVersion.filename}`;
-
-    /* upload file to tmp bucket*/
-    await storageService.uploadToTmp({
-        tmpPath,
-        buffer: file.buffer,
-        mimeType: file.mimeType
-    });
-
-    await fileVersionService.updateOne(newVersion.id, {
-        status: "queued",
-        tmpPath: tmpPath,
-    });
+    return { newFile, ver1 }
+}
 
 
-    await publishEvent("fileUpdate", {
-        status: "QUEUED",
-        success: true
-    });
+const uploadTmp = async (context) => {
+    const ctx = { ...context };
+    const { userId, file, info } = ctx;
 
-    await addFileJob({
-        versionId: newVersion.id,
-        userId,
-        tmpPath,
-        fileId: newFile.id
-    });
+    info(">>>userId:", userId);
+    const result = validate(ctx);
 
-    return {
-        fileId: newFile.id,
-        versionId: newVersion.id,
-        tmpPath: tmpPath
+    if (!result.success) {
+        info("failed upload:", result)
+        return {
+            ctx,
+            result
+        };
+    }
+
+    // console.log(">", uploaded.filename);
+    // console.log(">>>f:", file);
+    try {
+        const { newFile, ver1 } = await createFileAndVersion(ctx);
+
+        const tmpPath = `${newFile.ownerId}/${newFile.id}/${ver1.id}/${ver1.filename}`;
+        /* upload file to tmp bucket*/
+        await context.storageService.uploadToTmp({
+            tmpPath,
+            buffer: file.buffer,
+            mimeType: file.mimeType
+        });
+
+        info(3333333);
+
+        const ver2 = await context.versionService.updateOne(ver1.id, {
+            status: ctx.FileStatus.QUEUED,
+            tmpPath: tmpPath,
+        });
+
+        ctx.file = newFile;
+        ctx.version = ver2
+
+        info(111111);
+        await context.addFileJob(ctx);
+
+        info("fileUpload:", true)
+        return {
+            status: 200,
+            success: true,
+            context: ctx,
+            response: {
+                message: "added file job",
+                fileId: newFile.id,
+                versionId: ver2.id,
+            },
+        }
+    } catch (e) {
+
+        return {
+            status: 500,
+            success: false,
+            context,
+            response: {
+                message: "failed to add job",
+                error: {
+                    code: e.code,
+                    message: e.message
+                },
+                fileId: file.id
+            },
+        }
     }
 }
 

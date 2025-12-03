@@ -2,10 +2,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "../pages/Login";
 import DashboardPage from "../pages/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
+import Navbar from "../components/Navbar";
 
 export default function AppRouter() {
     return (
         <BrowserRouter>
+            <Navbar />
+
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route

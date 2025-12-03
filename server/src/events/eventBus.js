@@ -1,9 +1,11 @@
-const { eventName } = require('../constants');
-
+const { FILE_UPDATE } = require('../constants');
+const { errorLog, info } = require('../utils/logger');
 const sub = require('./eventSubscriber');
+
 let clients = new Set();
 
 function addClient(res) {
+    info("addres:", res)
     clients.add(res);
 }
 
@@ -11,12 +13,15 @@ function removeClient(res) {
     clients.delete(res);
 }
 
-sub.on(eventName.FILE_UPDATE, (event) => {
+sub.on(FILE_UPDATE, (event) => {
+    try {
+        const data = `event: fileUpdate\ndata: ${JSON.stringify(event)}\n\n`;
 
-    const data = `event: fileUpdate\ndata: ${JSON.stringify(event)}\n\n`;
-
-    for (const res of clients) {
-        res.write(data);
+        for (const res of clients) {
+            res.write(data);
+        }
+    } catch (e) {
+        errorLog(e);
     }
 });
 

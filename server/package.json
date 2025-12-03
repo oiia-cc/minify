@@ -8,6 +8,8 @@
   },
   "scripts": {
     "seed": "node ./src/database/seed.js",
+    "migrate:dev": "dotenv -e .env.development -- prisma migrate dev",
+    "migrate:prod": "dotenv -e .env.production -- npx prisma migrate deploy",
     "migrate": "npx prisma migrate deploy",
     "clean": "pm2 delete all || true",
     "dev": "pm2 delete all || true && pm2 start ecosystem.config.js --watch && pm2 logs",
@@ -36,6 +38,7 @@
     "redis": "^5.9.0"
   },
   "devDependencies": {
-    "cross-env": "^10.1.0"
+    "cross-env": "^10.1.0",
+    "dotenv-cli": "^11.0.0"
   }
 }
