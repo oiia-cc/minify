@@ -5,7 +5,6 @@ const sub = require('./eventSubscriber');
 let clients = new Set();
 
 function addClient(res) {
-    info("addres:", res)
     clients.add(res);
 }
 

@@ -8,6 +8,8 @@ export const useFiles = () => {
 
     const refresh = async () => {
         const res = await filesApi.list();
+        // console.log(">>>", res);
+        
         setFiles(res.data.data);
     };
 

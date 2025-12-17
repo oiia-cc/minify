@@ -1,14 +1,8 @@
 const auditLogService = require('../../../../services/auditLog/auditLogService');
 const { FileStatus } = require("../../../../constants");
 
-const handleError = async (context, err) => {
-    let ctx = { ...context };
-
-    const file = ctx.job.data.file;
-    const version = ctx.job.data.version;
-    const jobUuid = ctx.jobUuid;
-    const step = ctx.step;
-    const info = ctx.info;
+const handleError = async ({ version, jobUuid, container, err }) => {
+    const info = container.info;
 
     info("scan error:", err);
     await ctx.auditLogService.createOne({

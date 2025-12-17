@@ -1,18 +1,15 @@
 const { FileStatus, ProgressMap } = require("../../../../constants");
 
-const handleSucceeded = async ({ version, file, step }) => {
-
+const handleSucceeded = async (version, container, step) => {
 
     return {
         success: true,
-        status: FileStatus.COMPLETED,
+        status: container.FileStatus.COMPLETED,
         progress: 100,
         message: "upload file pipeline success",
         fileId: version.fileId,
         versionId: version.id,
         step,
-        file,
-        version
     };
 }
 

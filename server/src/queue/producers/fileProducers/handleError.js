@@ -1,6 +1,6 @@
-const handleError = async (ctx, err) => {
+const handleError = async (ctx, container, err) => {
 
-    await ctx.auditLogService.createOne({
+    await container.auditLogService.createOne({
         actorType: "system",
         action: "addJob",
         details: {
@@ -8,15 +8,18 @@ const handleError = async (ctx, err) => {
             error: err
         }
     });
+    container.info("eeeeettt", err);
+
     return {
         success: false,
         message: err.message,
         context: ctx,
         data: {
-            file: origin.file,
-            version: origin.version
+            fileId: ctx.fileId,
+            version: ctx.versionId
         }
     }
+
 }
 
 module.exports = handleError;

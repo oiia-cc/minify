@@ -1,23 +1,24 @@
-const createJobAndEnqueue = async (ctx) => {
-    let context = { ...ctx };
-    const { info, file, version } = context;
+const createJobAndEnqueue = async (version, container) => {
+    const { info } = container;
 
-    const prismaJob = await ctx.jobService.createOne({
+    const prismaJob = await container.jobService.createOne({
         jobType: "UPLOAD_FILE",
-        payload: context.version,
-        fileVersionId: context.version.id
+        payload: version,
+        fileVersionId: version.id
     });
+
     info("prismajob:", prismaJob);
 
-    await ctx.fileQueue.add('FILE_PROCESS_JOB', {
-        file,
-        version: context.version
-    }, {
-        jobUuid: prismaJob.jobUuid
-    })
-    context.prismaJob = prismaJob;
+    const jobUuid = prismaJob.jobUuid;
 
-    return context;
+    await container.fileQueue.add('FILE_PROCESS_JOB', {
+        version,
+    }, {
+        jobUuid: jobUuid
+    })
+
+    return jobUuid;
 }
 
-module.exports = createJobAndEnqueue;
+module.exports = { createJobAndEnqueue };
+

@@ -1,13 +1,15 @@
 
-const handleSucceededHelper = async (context) => {
+const handleSucceededHelper = async (context, container) => {
     // Hoàn tất pipeline
-    const { jobUuid, job } = context;
+    const { jobUuid } = context.opts;
+    const { version } = context.jobData;
+    const { info } = container;
 
-    await context.jobService.updateOne(jobUuid, {
+    await container.jobService.updateOne(jobUuid, {
         status: "succeeded"
     });
 
-    await context.auditLogService.createOne({
+    await container.auditLogService.createOne({
         action: "worker.processFileJob.succeeded",
         actorType: "worker",
         targetType: "job",
@@ -15,40 +17,22 @@ const handleSucceededHelper = async (context) => {
         details: {
             jobUuid,
             jobData: {
-                fileId: job.data.file.id,
-                versionId: job.data.version.id,
-                userId: job.data.version.userId
+                version
             }
         }
     });
-    await context.notificationService.createOne({
-        userId: job.data.file.ownerId,
-        payload: {
-            message: "succeeded-uploaded-files",
-            success: true,
-            fileId: job.data.file.id,
-            versionId: job.data.version.id,
-        }
-    })
-
-    // await context.publishEvent("fileUpdate", {
-    //     success: true,
-    //     step,
-    //     status: result.status,
-    //     progress: result.progress,
-    //     message: result.message,
-
-    //     fileId: result.version.fileId,
-    //     versionId: result.version.id,
-
-    //     data: {
-    //         file: result.file,
-    //         version: result.version
-    //     },
-
-    //     error: result.error || null
+    // await container.notificationService.createOne({
+    //     userId: job.data.file.ownerId,
+    //     payload: {
+    //         message: "succeeded-uploaded-files",
+    //         success: true,
+    //         fileId: version.fileId,
+    //         versionId: version.id,
+    //     }
     // })
 
+    info("ododod, ", context)
+        ;
 }
 
 module.exports = {

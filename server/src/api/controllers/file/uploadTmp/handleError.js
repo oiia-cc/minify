@@ -1,14 +1,14 @@
 
-const handleError = async (ctx) => {
+const handleError = async (ctx, container, err) => {
 
-    await ctx.auditLogService.createOne({
+    await container.auditLogService.createOne({
         actorType: "user",
         action: "user" + ".upload.failed",
         targetType: "file",
         details: {
             userId: ctx.userId,
             reason: "exception",
-            uploaded: ctx.file
+            error: err
         }
     });
 

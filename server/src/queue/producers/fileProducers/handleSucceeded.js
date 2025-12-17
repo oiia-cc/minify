@@ -1,20 +1,19 @@
-const handleSucceded = async (ctx) => {
-    const { file, version, prismaJob } = ctx;
+const handleSucceded = async (ctx, container, jobUuid) => {
 
-    await ctx.auditLogService.createOne({
+    await container.auditLogService.createOne({
         actorType: "system",
         action: "system.addJob.succeeded",
         details: {
-            jobDb: prismaJob
+            jobUuid
         }
     });
 
-    await ctx.auditLogService.createOne({
+    await container.auditLogService.createOne({
         actorType: "system",
         action: "system.addJob.succeeded",
         details: {
-            fileId: file.id,
-            versionId: version.id
+            jobUuid,
+            versionId: ctx.versionId
         }
     });
 

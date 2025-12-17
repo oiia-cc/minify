@@ -1,57 +1,67 @@
-const { info } = require("../../../utils/logger");
+const { info, errorLog } = require("../../../utils/logger");
 const { handleError } = require("./helpers/handleError");
 const { handleScan } = require("./helpers/handleScan");
 const { handleInfected } = require("./helpers/handleInfected");
 
-const virusScan = async (context) => {
+// const result = await processors[step](context, container, step);
+
+
+const virusScan = async (context, container, step) => {
     let ctx = { ...context };
 
-    const file = ctx.job.data.file;
-    const version = ctx.job.data.version;
+
+    // const file = ctx.job.data.file;
+    const version = ctx.jobData.version;
     const jobUuid = ctx.jobUuid;
-    const step = ctx.step;
 
-    ctx.file = file;
-    ctx.version = version;
-    ctx.jobUuid = jobUuid;
-    ctx.step = step;
+    const { info } = container;
 
-    const { info } = ctx;
-
-    info("verdfddf", ctx);
+    info("verdfddf", version);
 
     try {
         info(">>>tmp:", version.tmpPath);
-        const scan = await handleScan(ctx);
+        const scan = await handleScan(version, container);
         if (scan.infected) {
             await handleInfected(ctx);
             info("intected");
             return {
                 success: false,
                 step,
-                status: ctx.FileStatus.VIRUS_FAILED,
-                message: "virus detected: " + scan
+                status: container.FileStatus.VIRUS_FAILED,
+                progress: container.ProgressMap.VIRUS_SCAN,
+                message: "virus detected: " + scan,
+                fileId: version.fileId,
+                versionId: version.id
             }
         }
 
-        info("ofkodkfd")
+        info("ofkodkfd", scan)
         return {
             success: true,
             step,
-            status: ctx.FileStatus.PROCESSING,
-            progress: ctx.ProgressMap.VIRUS_SCAN,
+            status: container.FileStatus.PROCESSING,
+            progress: container.ProgressMap.VIRUS_SCAN,
             message: "scan virus success",
-            file,
-            version
+            fileId: version.fileId,
+            versionId: version.id
         };
 
     } catch (err) {
-
-        await handleError(context, err);
+        errorLog("ẻw", err);
+        await handleError({
+            version,
+            jobUuid,
+            container,
+            err
+        });
         return {
             success: false,
             step: step,
             message: "occur exception in virus scan",
+            fileId: version.fileId,
+            versionId: version.id,
+            status: container.FileStatus.PROCESSING,
+            progress: container.ProgressMap.VIRUS_SCAN,
             error: err
         }
     }

@@ -1,16 +1,14 @@
 
-const handleError = async (ctx, err) => {
-    const errorLog = ctx.errorLog;
+const handleError = async (ctx, container, err) => {
+    const { errorLog } = container;
 
-
-    const jobUuid = ctx.job.opts.jobUuid;
-    const attempt = ctx.job.attemptsMade + 1;
-    const maxAttempts = ctx.job.opts.attempts;
-    // const pipeline = ctx.Pipelines[ctx.job.name];
+    const jobUuid = ctx.opts.jobUuid;
+    const attempt = ctx.attemptsMade + 1;
+    const maxAttempts = ctx.opts.attempts;
 
     errorLog("errrri:", jobUuid, "ee:", err);
 
-    const jobRecord = await ctx.jobService.updateOne(jobUuid, {
+    const jobRecord = await container.jobService.updateOne(jobUuid, {
         status: "failed",
         lastError: err.message
     });
@@ -20,45 +18,43 @@ const handleError = async (ctx, err) => {
         throw err; // BẮT BUỘC: ĐỂ BullMQ RETRY
     }
 
-    await ctx.jobService.updateOne(jobUuid, {
+    await container.jobService.updateOne(jobUuid, {
         status: "dead_letter",
-        lastError: err.message
+        lastError: err
     });
 
     // Hết retry → đưa vào DLQ
 
-    await ctx.auditLogService.createOne({
+    await container.auditLogService.createOne({
         action: "worker.processFileJob.failed",
         actorType: "worker",
         targetType: "context",
-
         targetId: jobUuid,
-        details: {
-            jobUuid,
-            jobData: {
-                fileId: ctx.job.data.file.id,
-                versionId: ctx.job.data.version.id,
-                userId: ctx.job.data.version.userId
-            },
-            error: err.message
-        }
+        // details: {
+        //     jobUuid,
+        //     jobData: {
+        //         fileId: version.fileId,
+        //         versionId: version.id,
+        //     },
+        //     error: err
+        // }
     });
-    await ctx.notificationService.createOne({
+    await container.notificationService.createOne({
         userId: ctx.job.data.file.ownerId,
         payload: {
             success: false,
             message: "failed-uploaded-files",
-            fileId: ctx.job.data.file.id,
-            versionId: ctx.job.data.version.id,
+            fileId: version.fileid,
+            versionId: version.id,
         }
     })
-    await ctx.publishEvent("fileUpdate", {
+    await container.publishEvent("fileUpdate", {
         success: false,
         status: "pipeline_failed",
         message: err.message,
         error: err,
-        fileId: ctx.job.data?.version?.fileId,
-        versionId: ctx.job.data?.version?.id,
+        fileId: version?.fileId,
+        versionId: version?.id,
         // data: ctx.job.data
     });
     errorLog("succeeded handle err")

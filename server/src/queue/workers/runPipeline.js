@@ -10,32 +10,43 @@ const { runPipelineHelper } = require('./helpers/runPipeline.hepler');
 const { handleSucceededHelper } = require('./helpers/handleSucceeded.helper');
 const handleError = require('./helpers/handleError');
 
-const runPipeline = async (context) => {
-    const ctx = { ...context };
-    info("ctxaed", context.job.name);
+const runPipeline = async (context, container) => {
 
-    ctx.jobUuid = context.job.opts.jobUuid;
-    ctx.attempt = context.job.attemptsMade + 1;
-    ctx.maxAttempts = context.job.opts.attempts;
-    ctx.pipeline = ctx.Pipelines[context.job.name];
+    // const ctx = { ...context };
+    // info("ctxaed", context.ops.);
 
-    info(`context ${ctx.jobUuid} attempt ${ctx.attempt}/${ctx.maxAttempts}`);
-    info(">>>pline:", ctx.pipeline);
+    const { info } = container;
+    const jobUuid = context.opts.jobUuid;
 
-    await ctx.jobService.updateOne(ctx.jobUuid, {
-        status: ctx.JOB_DB_STATUS.IN_PROGRESS,
-        attempts: ctx.attempt
+    info("jobid", jobUuid);
+    const attempt = context.attemptsMade + 1;
+    const maxAttempts = context.opts.attempts;
+    const pipeline = Pipelines[context.jobName];
+
+    info(">>>pline:", pipeline);
+
+    // info(`context ${jobUuid} attempt ${attempt}/${maxAttempts}`);
+    // info(">>>pline:", pipeline);
+
+    const result = await container.jobService.updateOne(jobUuid, {
+        status: container.JOB_DB_STATUS.IN_PROGRESS,
+        attempts: attempt
     });
 
+    info("fffffi", result);
+
     try {
-        // await runPipelineHelper(pipeline, context, jobUuid);
-        await runPipelineHelper(ctx);
-        await handleSucceededHelper(ctx);
+        await runPipelineHelper(context, container, pipeline);
+        await handleSucceededHelper(context, container);
 
     } catch (err) {
         info(">>>step-fail:", err);
 
-        await handleError(context, err);
+        await handleError({
+            context,
+            container,
+            err
+        });
     }
 }
 

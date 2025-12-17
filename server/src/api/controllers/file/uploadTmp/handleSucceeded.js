@@ -1,13 +1,13 @@
 
-const handleSucceeded = async (context) => {
+const handleSucceeded = async (context, container) => {
 
-    await context.auditLogService.createOne({
+    await container.auditLogService.createOne({
         actorType: "human",
         action: "humnan" + ".upload.accept",
         targetType: "file",
         targetId: context.fileId,
         details: {
-            uploaded: context.file
+            message: "uploadding"
         }
     });
 

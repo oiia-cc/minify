@@ -16,8 +16,6 @@ function App() {
     init();
   }, []);
 
-
-
   useSSE("fileUpdate", e => {
     const data = JSON.parse(e.data);
     console.log('>>>REALTIME MSG:', data);

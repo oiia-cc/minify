@@ -8,27 +8,29 @@ const processors = {
     FINALIZE: updateFinal
 }
 
-const runPipelineHelper = async (context) => {
+const runPipelineHelper = async (context, container, pipeline) => {
     let ctx = { ...context };
-    const { pipeline, job, jobUuid } = ctx;
+    const job = context.jobData;
+    const jobUuid = context.opts.jobUuid;
+
+    console.log("jobdđd", job);
 
     for (const step of pipeline) {
-        info(">>>step:", step);
-        // const result = await processors[step](job.data, job.name, jobUuid, step);
-        ctx.step = step;
-        const result = await processors[step](ctx);
+        //     info(">>>step:", step);
+        const result = await processors[step](context, container, step);
 
+        info("rreeeewwwwww", result)
         info(">>>resultst:", result);
         if (result && result.success === true) {
-            await ctx.publishEvent("fileUpdate", {
+            await container.publishEvent("fileUpdate", {
                 success: true,
                 step,
                 status: result.status,
                 progress: result.progress,
                 message: result.message,
 
-                fileId: result.version.fileId,
-                versionId: result.version.id,
+                fileId: result.fileId,
+                versionId: result.id,
 
                 data: {
                     file: result.file,
@@ -37,8 +39,10 @@ const runPipelineHelper = async (context) => {
 
                 error: result.error || null
             })
+            info(">>>step-ok:", step);
+
         }
-        info(">>>step-ok:", step);
+        info(">>>pieline-ok:");
 
         if (result && result.success === false) {
             throw new Error(result.message || "Step failed");

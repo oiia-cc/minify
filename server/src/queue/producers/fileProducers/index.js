@@ -1,39 +1,38 @@
 
-const createJobAndEnqueue = require('./createJobAndEnqueue');
+const { createJobAndEnqueue } = require('./createJobAndEnqueue');
 const handleError = require('./handleError');
 const handleSucceded = require('./handleSucceeded');
 
-const addFileJob = async (ctx) => {
-    console.log("__ctx:", ctx.versionService);
+const addFileJob = async (ctx, container, version) => {
+    // console.log("__ctx:");
     let context = { ...ctx };
-    const { file, version, info, errorLog } = context;
+    const { fileId, versionId } = context;
+    const { info, errorLog } = container;
+
+    info("eeeeo", ctx)
 
     try {
-        const newVer = await ctx.versionService.updateOne(
-            version.id, {
+        await container.versionService.updateOne(
+            versionId, {
             status: 'processing'
-        }
-        );
-        context.version = newVer;
-
+        });
         // create new db job and add job to queue
-        context = await createJobAndEnqueue(context);
+        const jobUuid = await createJobAndEnqueue(version, container);
 
-        await handleSucceded(context);
-
+        await handleSucceded(context, container, jobUuid);
         return {
             success: true,
             message: "added job",
             context,
-
             data: {
-                file,
-                version
+                jobUuid,
+                fileId: context.versionId,
+                versionId: context.fileId
             }
         }
     } catch (err) {
         console.log(err);
-        await handleError(ctx, err);
+        await handleError(ctx, container, err);
     }
 }
 

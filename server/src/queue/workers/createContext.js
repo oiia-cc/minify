@@ -1,25 +1,21 @@
 const { FILE_QUEUE_NAME, JOB_BULLMQ_STATUS, Pipelines, JOB_DB_STATUS, FileStatus, ProgressMap } = require('../../constants');
 const { FILE_PROCESS_JOB } = require('../../constants/jobNames');
-const { createContainer } = require('../../container');
+const { info } = require('../../utils/logger');
 
 function createWorkerContext(job) {
-    const container = createContainer();
+    // info()
 
     const context = {
-        ...container,
-        FileStatus,
-        ProgressMap,
-        JOB_BULLMQ_STATUS,
-        FILE_QUEUE_NAME,
-        FILE_PROCESS_JOB,
-        JOB_DB_STATUS,
-        job,
-        data: job.data,
+        jobName: job.name,
         step: null,
-        Pipelines,
+        attemptsMade: job.attemptsMade,
+        jobData:
+        {
+            version: job.data.version,
+        },
+        opts: job.opts,
 
     };
-    // job.context = context;
     return context;
 }
 

@@ -5,7 +5,8 @@ import { useEffect } from "react";
 export default function FileList() {
     const { files } = useFiles();
 
-
+    console.log("/>>>", files);
+    
     if (!files.length) return <div>No files yet.</div>
 
     return (

@@ -4,38 +4,45 @@ const versionService = require('../../../services/version/versionService');
 const { FileStatus, ProgressMap } = require('../../../constants');
 const { handleSucceeded } = require('./helpers/handleSucceeded');
 
-const updateFinal = async (context) => {
+const updateFinal = async (context, container, step) => {
     const ctx = { ...context }
 
-    const { step, info } = ctx;
-    const { file, version } = ctx.job.data;
+    const { version } = ctx.jobData;
 
+    const { info } = container;
     info("fppppp, ", version);
 
+    const { id: versionId, tmpPath, fileId } = version;
+
     try {
-        const { id: versionId, tmpPath, fileId } = version;
-        ctx.version = await ctx.versionService.updateOne(versionId, {
+        const newVer = await container.versionService.updateOne(versionId, {
             status: FileStatus.COMPLETED,
             storagePath: tmpPath,
             tmpPath: "null"
         })
-        const moved = await storageService.moveToFinal({ tmpPath });
+        const moved = await container.storageService.moveToFinal({ tmpPath });
 
-        ctx.file = await ctx.fileService.updateOne(fileId, {
-            displayName: ctx.version.filename
+        const newFile = await container.fileService.updateOne(fileId, {
+            displayName: newVer.filename
         });
         // console.log(">>>verrr:", versionUpdated);
         // console.log(">>>movedd:", moved);
         // console.log(">>>updated:", updatedFile);
 
-        const res = await handleSucceeded(ctx);
+        const res = await handleSucceeded(newVer, container, step);
 
         return res;
+
     } catch (err) {
         info("errmm", err);
         return {
             success: false,
             step,
+            versionId,
+            fileId,
+            status: "falied",
+            progress: 99,
+            message: "occurs exception in final step",
             error: err,
         }
     }

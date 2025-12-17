@@ -7,13 +7,14 @@ const { info, errorLog } = require('../../utils/logger');
 const { runPipeline } = require("../workers/runPipeline");
 
 const { createWorkerContext } = require('./createContext');
+const { getContainer } = require("../../container");
 
 
 const worker = new Worker(FILE_QUEUE_NAME, async (job) => {
+    const container = getContainer();
     const context = createWorkerContext(job);
 
-    info('>>>start!!!!');
-    await runPipeline(context);
+    await runPipeline(context, container);
 }, {
     connection: createRedis(),
     skipStalledCheck: true,

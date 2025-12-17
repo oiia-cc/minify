@@ -1,10 +1,8 @@
-const { createContainer } = require('../container');
 
 function createApiContext(req) {
-    const container = createContainer();
+    console.log("ddddddd");
 
     return {
-        ...container,
         userId: req?.user?.id,
         file: req?.file,
     };

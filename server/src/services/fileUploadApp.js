@@ -1,5 +1,4 @@
 
-
 const validate = (context) => {
     if (!context.file) {
         return {
@@ -28,9 +27,11 @@ const validate = (context) => {
     };
 }
 
-const createFileAndVersion = async (context) => {
-    const { userId, file, info } = context
-    const newFile = await context.fileService.createOne({
+const createFileAndVersion = async (context, container) => {
+    const { userId, file } = context
+    const { info } = container;
+
+    const newFile = await container.fileService.createOne({
         ownerId: userId,
         displayName: file.originalname,
         isDeleted: false
@@ -38,9 +39,9 @@ const createFileAndVersion = async (context) => {
 
     info(">>>newfile:", newFile)
 
-    const hash = await context.hash(file.buffer);
+    const hash = await container.hash(file.buffer);
 
-    const ver1 = await context.versionService.createOne({
+    const ver1 = await container.versionService.createOne({
         storagePath: "init",
         tmpPath: "init",
         status: "uploaded",
@@ -55,29 +56,29 @@ const createFileAndVersion = async (context) => {
 }
 
 
-const uploadTmp = async (context) => {
+const uploadTmp = async (context, container) => {
     const ctx = { ...context };
-    const { userId, file, info } = ctx;
-
+    const { userId, file } = ctx;
+    const { info } = container;
     info(">>>userId:", userId);
-    const result = validate(ctx);
+    const validateResult = validate(ctx);
 
-    if (!result.success) {
-        info("failed upload:", result)
+    if (!validateResult.success) {
+        info("failed upload:", validateResult)
         return {
-            ctx,
-            result
+            context,
+            result: validateResult
         };
     }
 
     // console.log(">", uploaded.filename);
     // console.log(">>>f:", file);
     try {
-        const { newFile, ver1 } = await createFileAndVersion(ctx);
+        const { newFile, ver1 } = await createFileAndVersion(ctx, container);
 
         const tmpPath = `${newFile.ownerId}/${newFile.id}/${ver1.id}/${ver1.filename}`;
         /* upload file to tmp bucket*/
-        await context.storageService.uploadToTmp({
+        await container.storageService.uploadToTmp({
             tmpPath,
             buffer: file.buffer,
             mimeType: file.mimeType
@@ -85,26 +86,35 @@ const uploadTmp = async (context) => {
 
         info(3333333);
 
-        const ver2 = await context.versionService.updateOne(ver1.id, {
-            status: ctx.FileStatus.QUEUED,
+        const ver2 = await container.versionService.updateOne(ver1.id, {
+            status: container.FileStatus.QUEUED,
             tmpPath: tmpPath,
         });
 
-        ctx.file = newFile;
-        ctx.version = ver2
+        const fileId = newFile.id;
+        const versionId = ver2.id;
 
         info(111111);
-        await context.addFileJob(ctx);
+        delete ctx.file;
+        const newCtx = {
+            ...ctx,
+            fileId,
+            versionId
+        }
+        await container.addFileJob(newCtx, container, ver2);
 
-        info("fileUpload:", true)
+
+        info("fileUploadCTL: End");
         return {
             status: 200,
             success: true,
-            context: ctx,
+            context: {
+                ...newCtx
+            },
             response: {
                 message: "added file job",
-                fileId: newFile.id,
-                versionId: ver2.id,
+                fileId: fileId,
+                versionId: versionId,
             },
         }
     } catch (e) {
