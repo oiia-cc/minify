@@ -1,5 +1,5 @@
 // newmodule/infra/JwtService.js
-export class JwtService {
+class JwtService {
   constructor(jwt, configApp) {
     this.jwt = jwt;
     this.secret = configApp.app.jwtSecret;
@@ -12,3 +12,5 @@ export class JwtService {
     });
   };
 }
+
+module.exports = { JwtService };

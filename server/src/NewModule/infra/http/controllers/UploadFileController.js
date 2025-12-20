@@ -1,11 +1,16 @@
-class LoginController {
-  constructor({ loginUseCase }) {
-    this.loginUseCase = loginUseCase;
+class UploadFileController {
+  constructor({ uploadFileUseCase }) {
+    this.uploadFileUseCase = uploadFileUseCase;
   }
 
-  login = async (req, res, next) => {
+  uploadTmp = async (req, res, next) => {
     try {
-      const result = await this.loginUseCase.execute(req.body);
+      const params = {
+        userId: req.user.id,
+        file: req.file,
+      };
+
+      const result = await this.uploadFileUseCase.execute(params);
       res.status(200).json(result);
     } catch (err) {
       if (err.message === 'BAD_REQUEST') {
@@ -17,9 +22,10 @@ class LoginController {
       if (err.message === 'INVALID_CREDENTIALS') {
         return res.status(401).json({ message: 'Incorrect credentials' });
       }
+
       next(err);
     }
   };
 }
 
-module.exports = { LoginController };
+module.exports = { UploadFileController };

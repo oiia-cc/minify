@@ -1,5 +1,5 @@
 // newmodule/infra/BcryptHasher.js
-export class BcryptService {
+class BcryptService {
   constructor(bcrypt) {
     this.bcrypt = bcrypt;
   }
@@ -8,3 +8,5 @@ export class BcryptService {
     return this.bcrypt.compare(raw, hash);
   };
 }
+
+module.exports = { BcryptService };

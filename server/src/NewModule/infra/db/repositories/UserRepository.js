@@ -1,4 +1,4 @@
-export class UserRepository {
+class UserRepository {
   constructor(prisma) {
     this.prisma = prisma;
   }
@@ -10,3 +10,5 @@ export class UserRepository {
     return this.prisma.user.findFirst({ where: { email } });
   };
 }
+
+module.exports = { UserRepository };

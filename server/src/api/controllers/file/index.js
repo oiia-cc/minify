@@ -1,5 +1,9 @@
-const {uploadTmp, listFiles} = require('../../../NewModule/infra/http/controllers/fileController');
+const {
+  uploadTmp,
+  listFiles,
+} = require('../../../NewModule/infra/http/controllers/ListFileController');
+
 module.exports = {
-    uploadTmp,
-    listFiles
-}
+  uploadTmp,
+  listFiles,
+};

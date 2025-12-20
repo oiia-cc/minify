@@ -11,7 +11,7 @@ const bootstrap = async () => {
   const app = await createExpressApp();
 
   // loadroute
-  await loadRoutesAndMiddles(app, container);
+  await loadRoutesAndMiddles(app);
 
   return new Promise((resolve) => {
     app.listen(port, () => {
