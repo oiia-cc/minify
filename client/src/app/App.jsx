@@ -10,9 +10,9 @@ function App() {
 
   // const init = useAuthStore((s) => s.init);
 
-  useEffect(() => {
-    // init();
-  }, []);
+  // useEffect(() => {
+  // init();
+  // }, []);
 
   // useSSE('fileUpdate', (e) => {
   //   const data = JSON.parse(e.data);

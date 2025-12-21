@@ -27,5 +27,5 @@ node_modules
 /src/schema.prisma
 /src/database/migrations
 
-/dist
 /scripts
+a.txt

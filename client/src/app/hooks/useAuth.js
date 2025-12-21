@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 
 export const useAuth = () => {
   const navigate = useNavigate();
+
   const me = useQuery({
     queryKey: ['me'],
-    queryFn: async function () {
+    queryFn: async function fetchMe() {
       const res = await authApi.me();
-      console.log('--->>>me: ', res.data);
+      console.log('--->>>mee:', res.data);
 
       return res.data;
     },
@@ -23,13 +24,6 @@ export const useAuth = () => {
     const user = res.data.user;
     return user;
   };
-
-  //   const me = async () => {
-  //     const res = await authApi.me();
-  //     console.log('--->>>mee:', res.data);
-
-  //     return res.data;
-  //   };
 
   const logout = async () => {
     const res = await authApi.me();

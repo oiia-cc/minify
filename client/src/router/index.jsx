@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import LoginPage from '../pages/Login';
+import LoginPage from '../pages/Login/Login';
 import { DashboardPage } from '../NEWMODULE/features/userDashboard';
 import ProtectedRoute from './ProtectedRoute';
 import Navbar from '../components/Navbar';

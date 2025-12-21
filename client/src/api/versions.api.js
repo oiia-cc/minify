@@ -34,38 +34,3 @@ export function useAuth() {
     signOut, // ex fn,
   };
 }
-
-
-
-----
-
-* giải thích file reactQuery và tại sao thay đc zustand?  import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchMe, login, logout } from './auth.api'
-
-export function useAuth() {
-  const qc = useQueryClient()
-
-  const meQuery = useQuery({
-    queryKey: ['me'],
-    queryFn: fetchMe,
-    retry: false,
-  })
-
-  const signIn = async (payload) => {
-    await login(payload)
-    qc.invalidateQueries(['me'])
-  }
-
-  const signOut = async () => {
-    await logout()
-    qc.setQueryData(['me'], null)
-  }
-
-  return {
-    user: meQuery.data,
-    isLoading: meQuery.isLoading,
-    isAuthenticated: !!meQuery.data,
-    signIn,
-    signOut,
-  }
-}
