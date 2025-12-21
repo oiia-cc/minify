@@ -7,6 +7,7 @@
     "schema": "./src/database/schema.prisma"
   },
   "scripts": {
+    "generate:dev": "npx dotenv-cli -e .env.development -- prisma generate",
     "seed": "node ./src/database/seed.js",
     "migrate": "npx prisma migrate deploy",
     "clean": "pm2 delete all || true",
