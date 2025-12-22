@@ -1,6 +1,6 @@
 export function FilterBar({ value, onChange }) {
   return (
-    <dvi>
+    <div>
       <label htmlFor="">---groupBy-by:</label>
       <select
         onChange={(e) =>
@@ -41,6 +41,6 @@ export function FilterBar({ value, onChange }) {
         <option value="desc">desc</option>
         <option value="asc">asc</option>
       </select>
-    </dvi>
+    </div>
   );
 }

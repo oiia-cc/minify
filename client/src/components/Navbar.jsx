@@ -1,8 +1,11 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../app/hooks/useAuth';
+import { useEffect } from 'react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+
+  // useEffect(() => {}, [user]);
 
   return (
     <nav
@@ -17,7 +20,7 @@ export default function Navbar() {
     >
       {user && (
         <span style={{ color: 'red', fontWeight: 700, alignSelf: 'center' }}>
-          Hello {user.handle}
+          Hello {user?.handle}
         </span>
       )}
 
